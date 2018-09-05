@@ -529,14 +529,15 @@ function createLightRingProject {
   cd $projectdir
 
   # AMiRo-OS, ChibiOS, AMiRo-BLT and AMiRo-LLD relative root directories
-  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../../os)
-  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../kernel/ChibiOS)
-  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../bootloader/AMiRo-BLT)
-  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../periphery-lld/AMiRo-LLD)
+  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../..)
+  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/kernel/ChibiOS)
+  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/bootloader/AMiRo-BLT)
+  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/periphery-lld/AMiRo-LLD)
 
   # generate a file that contains all subdirectories as includes (but ignore hidden and documentation directories)
   find $gccincludedir -type d > ${projectdir}/LightRing.includes
-  find $amiroosrootdir -type d | grep -v "/doc\|/build\|/.dep\|/PowerManagement\|/DiWheelDrive" >> ${projectdir}/LightRing.includes
+  find $amiroosrootdir/modules -type d | grep -v "/doc\|/build\|/.dep\|/PowerManagement\|/DiWheelDrive" >> ${projectdir}/LightRing.includes
+  find $amiroosrootdir/os -type d | grep -v "/doc\|/build\|/.dep\|/PowerManagement\|/DiWheelDrive" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/os/common/abstractions/cmsis_os$" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/os/common/ext/CMSIS/(include|ST/STM32F1xx)$" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/os/common/oslib/(include|src)$" >> ${projectdir}/LightRing.includes
@@ -559,7 +560,7 @@ function createLightRingProject {
     find $path -maxdepth 1 -type f \( ! -iname ".*" \) |
       grep -Ev "^.*((/arm-none-eabi/)|(PowerManagement)|(DiWheelDrive)).*$" |
       grep -E  "^.*(\.s|\.S|\.h|\.c|\.hpp|\.cpp|\.tpp|\.ld)$" |
-      grep -Ev "^${amiroosrootdir}/hal/ports/((STM32F[^1])|(STM32F1[^0])|(STM32F10[^3])|(STM32F103[^x])|(STM32F103x[^E])).*$" |
+      grep -Ev "^${amiroosrootdir}/os/hal/ports/((STM32F[^1])|(STM32F1[^0])|(STM32F10[^3])|(STM32F103[^x])|(STM32F103x[^E])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/ST/STM32F1xx/((stm32f1[^0x])|(stm32f10[^3])|(stm32f103[^x])|(stm32f103x[^e])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/include/((core_[^c])|(core_c[^m])|(core_cm[^3A-Za-z])|(cmsis_[^g])|(cmsis_g[^c]|(cmsis_gc[^c])))" |
       grep -Ev "^${chibiosrootdir}/os/common/ports/ARMCMx/chcore_v[^7]m.*$" |
@@ -661,14 +662,15 @@ function createPowerManagementProject {
   cd $projectdir
 
   # AMiRo-OS, ChibiOS, AMiRo-BLT and AMiRo-LLD relative root directories
-  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../../os)
-  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../kernel/ChibiOS)
-  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../bootloader/AMiRo-BLT)
-  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../periphery-lld/AMiRo-LLD)
+  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../..)
+  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/kernel/ChibiOS)
+  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/bootloader/AMiRo-BLT)
+  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/periphery-lld/AMiRo-LLD)
 
   # generate a file that contains all subdirectories as includes (but ignore hidden and documentation directories)
   find $gccincludedir -type d > ${projectdir}/PowerManagement.includes
-  find $amiroosrootdir -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/DiWheelDrive" >> ${projectdir}/PowerManagement.includes
+  find $amiroosrootdir/modules -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/DiWheelDrive" >> ${projectdir}/PowerManagement.includes
+  find $amiroosrootdir/os -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/DiWheelDrive" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/os/common/abstractions/cmsis_os$" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/os/common/ext/CMSIS/(include|ST/STM32F4xx)$" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/os/common/oslib/(include|src)$" >> ${projectdir}/PowerManagement.includes
@@ -691,7 +693,7 @@ function createPowerManagementProject {
     find $path -maxdepth 1 -type f \( ! -iname ".*" \) |
       grep -Ev "^.*((/arm-none-eabi/)|(LightRing)|(DiWheelDrive)).*$" |
       grep -E  "^.*(\.s|\.S|\.h|\.c|\.hpp|\.cpp|\.tpp|\.ld)$" |
-      grep -Ev "^${amiroosrootdir}/hal/ports/((STM32F[^4])|(STM32F4[^0])|(STM32F40[^5])|(STM32F405[^x])|(STM32F405x[^G])).*$" |
+      grep -Ev "^${amiroosrootdir}/os/hal/ports/((STM32F[^4])|(STM32F4[^0])|(STM32F40[^5])|(STM32F405[^x])|(STM32F405x[^G])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/ST/STM32F4xx/((stm32f4[^0x])|(stm32f40[^5])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/include/((core_[^c])|(core_c[^m])|(core_cm[^4A-Za-z])|(cmsis_[^g])|(cmsis_g[^c]|(cmsis_gc[^c])))" |
       grep -Ev "^${chibiosrootdir}/os/common/ports/ARMCMx/chcore_v[^7]m.*$" |
@@ -792,14 +794,15 @@ function createDiWheelDriveProject {
   cd $projectdir
 
   # AMiRo-OS, ChibiOS, AMiRo-BLT and AMiRo-LLD relative root directories
-  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../../os)
-  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../kernel/ChibiOS)
-  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../bootloader/AMiRo-BLT)
-  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/../periphery-lld/AMiRo-LLD)
+  local amiroosrootdir=$(realpath --relative-base=$projectdir $(dirname ${BASH_SOURCE[0]})/../../..)
+  local chibiosrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/kernel/ChibiOS)
+  local amirobltrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/bootloader/AMiRo-BLT)
+  local amirolldrootdir=$(realpath --relative-base=$projectdir ${amiroosrootdir}/periphery-lld/AMiRo-LLD)
 
   # generate a file that contains all subdirectories as includes (but ignore hidden and documentation directories)
   find $gccincludedir -type d > ${projectdir}/DiWheelDrive.includes
-  find $amiroosrootdir -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/PowerManagement" >> ${projectdir}/DiWheelDrive.includes
+  find $amiroosrootdir/modules -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/PowerManagement" >> ${projectdir}/DiWheelDrive.includes
+  find $amiroosrootdir/os -type d | grep -v "/doc\|/build\|/.dep\|/LightRing\|/PowerManagement" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/os/common/abstractions/cmsis_os$" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/os/common/ext/CMSIS/(include|ST/STM32F1xx)$" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/os/common/oslib/(include|src)$" >> ${projectdir}/DiWheelDrive.includes
@@ -822,7 +825,7 @@ function createDiWheelDriveProject {
     find $path -maxdepth 1 -type f \( ! -iname ".*" \) |
       grep -Ev "^.*((/arm-none-eabi/)|(LightRing)|(PowerManagement)).*$" |
       grep -E  "^.*(\.s|\.S|\.h|\.c|\.hpp|\.cpp|\.tpp|\.ld)$" |
-      grep -Ev "^${amiroosrootdir}/hal/ports/((STM32F[^1])|(STM32F1[^0])|(STM32F10[^3])|(STM32F103[^x])|(STM32F103x[^E])).*$" |
+      grep -Ev "^${amiroosrootdir}/os/hal/ports/((STM32F[^1])|(STM32F1[^0])|(STM32F10[^3])|(STM32F103[^x])|(STM32F103x[^E])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/ST/STM32F1xx/((stm32f1[^0x])|(stm32f10[^3])|(stm32f103[^x])|(stm32f103x[^e])).*$" |
       grep -Ev "^${chibiosrootdir}/os/common/ext/CMSIS/include/((core_[^c])|(core_c[^m])|(core_cm[^3A-Za-z])|(cmsis_[^g])|(cmsis_g[^c]|(cmsis_gc[^c])))" |
       grep -Ev "^${chibiosrootdir}/os/common/ports/ARMCMx/chcore_v[^7]m.*$" |
