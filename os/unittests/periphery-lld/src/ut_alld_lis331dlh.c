@@ -219,6 +219,7 @@ aos_utresult_t utAlldLis331dlhFunc(BaseSequentialStream* stream, aos_unittest_t*
     }
     aosThdSSleep(1);
   }
+  event_mask = chEvtWaitOneTimeout(EVENT_MASK(3), TIME_IMMEDIATE);
   chEvtUnregister(((ut_lis331dlhdata_t*)(ut->data))->src, &el);
   if (status == APAL_STATUS_SUCCESS && success > 0) {
     aosUtPassed(stream, &result);

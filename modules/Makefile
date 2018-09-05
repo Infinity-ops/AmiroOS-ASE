@@ -32,13 +32,12 @@ endif
 CLEANTRGS = $(MODULES:%=clean_%)
 FLASHTRGS = $(MODULES:%=flash_%)
 
-.PHONY: all $(MODULES) flash $(FLASHTRGS) clean $(CLEANTRGS)
+.PHONY: all $(MODULES) $(FLASHTRGS) clean $(CLEANTRGS)
 
 all: $(MODULES)
 $(MODULES):
 	$(MAKE) -C $(MODULES_DIR)$@
 
-flash: $(FLASHTRGS)
 $(FLASHTRGS):
 	$(MAKE) -C $(MODULES_DIR)$(@:flash_%=%) flash
 

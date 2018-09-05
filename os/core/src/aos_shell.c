@@ -1503,7 +1503,7 @@ THD_FUNCTION(aosShellThread, shell)
       default:
       {
         // print an error message
-        chprintf((BaseSequentialStream*)&((aos_shell_t*)shell)->stream, "\nERROR: unknown event received (0x%08X)\n", eventmask);
+        chprintf((BaseSequentialStream*)&((aos_shell_t*)shell)->stream, "\nSHELL: ERROR: unknown event received (0x%08X)\n", eventmask);
         break;
       }
 

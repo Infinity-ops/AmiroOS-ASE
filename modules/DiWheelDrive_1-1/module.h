@@ -36,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /*===========================================================================*/
 #include <hal.h>
 #include <hal_qei.h>
-#include <aos_interrupts.h>
 
 /**
  * @brief   CAN driver to use.
@@ -47,17 +46,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @brief   Configuration for the CAN driver.
  */
 extern CANConfig moduleHalCanConfig;
-
-/**
- * @brief   Interrupt driver (PAL).
- */
-
-extern aos_interrupt_driver_t moduleIntDriver;
-
-/**
- * @brief   Interrupt driver config.
- */
-extern aos_interrupt_cfg_t moduleIntConfig[10];
 
 /**
  * @brief   I2C driver to access the compass.
@@ -92,22 +80,22 @@ extern PWMConfig moduleHalPwmDriveConfig;
 /**
  * @brief   Drive PWM channel for the left wheel forward direction.
  */
-#define MODULE_HAL_PWM_DRIVE_CHANNEL_LEFT_FORWARD     0
+#define MODULE_HAL_PWM_DRIVE_CHANNEL_LEFT_FORWARD     ((apalPWMchannel_t)0)
 
 /**
  * @brief   Drive PWM channel for the left wheel backward direction.
  */
-#define MODULE_HAL_PWM_DRIVE_CHANNEL_LEFT_BACKWARD    1
+#define MODULE_HAL_PWM_DRIVE_CHANNEL_LEFT_BACKWARD    ((apalPWMchannel_t)1)
 
 /**
  * @brief   Drive PWM channel for the right wheel forward direction.
  */
-#define MODULE_HAL_PWM_DRIVE_CHANNEL_RIGHT_FORWARD    2
+#define MODULE_HAL_PWM_DRIVE_CHANNEL_RIGHT_FORWARD    ((apalPWMchannel_t)2)
 
 /**
  * @brief   Drive PWM channel for the right wheel backward direction.
  */
-#define MODULE_HAL_PWM_DRIVE_CHANNEL_RIGHT_BACKWARD   3
+#define MODULE_HAL_PWM_DRIVE_CHANNEL_RIGHT_BACKWARD   ((apalPWMchannel_t)3)
 
 /**
  * @brief   Quadrature encooder for the left wheel.
@@ -171,119 +159,69 @@ extern SPIConfig moduleHalSpiGyroscopeConfig;
 #include <amiro-lld.h>
 
 /**
- * @brief   Interrupt channel for the SYS_SYNC signal.
- */
-#define MODULE_GPIO_INT_SYSSYNC          ((uint8_t)1)
-
-/**
- * @brief   Interrupt channel for the SYS_WARMRST signal.
- */
-#define MODULE_GPIO_INT_SYSWARMRST       ((uint8_t)2)
-
-/**
- * @brief   Interrupt channel for the PATH_DCSTAT signal.
- */
-#define MODULE_GPIO_INT_PATHDCSTAT       ((uint8_t)3)
-
-/**
- * @brief   Interrupt channel for the COMPASS_DRDY signal.
- */
-#define MODULE_GPIO_INT_COMPASSDRDY      ((uint8_t)4)
-
-/**
- * @brief   Interrupt channel for the SYS_PD signal.
- */
-#define MODULE_GPIO_INT_SYSPD            ((uint8_t)5)
-
-/**
- * @brief   Interrupt channel for the SYS_REG_EN signal.
- */
-#define MODULE_GPIO_INT_SYSREGEN         ((uint8_t)6)
-
-/**
- * @brief   Interrupt channel for the IR_INT signal.
- */
-#define MODULE_GPIO_INT_IRINT            ((uint8_t)7)
-
-/**
- * @brief   Interrupt channel for the GYRO_DRDY signal.
- */
-#define MODULE_GPIO_INT_GYRODRDY         ((uint8_t)8)
-
-/**
- * @brief   Interrupt channel for the SYS_UART_UP signal.
- */
-#define MODULE_GPIO_INT_SYSUARTUP        ((uint8_t)9)
-
-/**
- * @brief   Interrupt channel for the ACCEL_INT signal.
- */
-#define MODULE_GPIO_INT_ACCELINT         ((uint8_t)10)
-
-/**
  * @brief   LED output signal GPIO.
  */
-extern apalGpio_t moduleGpioLed;
+extern apalControlGpio_t moduleGpioLed;
 
 /**
  * @brief   POWER_EN output signal GPIO.
  */
-extern apalGpio_t moduleGpioPowerEn;
+extern apalControlGpio_t moduleGpioPowerEn;
 
 /**
  * @brief   COMPASS_DRDY input signal GPIO.
  */
-extern apalGpio_t moduleGpioCompassDrdy;
+extern apalControlGpio_t moduleGpioCompassDrdy;
 
 /**
  * @brief   IR_INT input signal GPIO.
  */
-extern apalGpio_t moduleGpioIrInt;
+extern apalControlGpio_t moduleGpioIrInt;
 
 /**
  * @brief   GYRO_DRDY input signal GPIO.
  */
-extern apalGpio_t moduleGpioGyroDrdy;
+extern apalControlGpio_t moduleGpioGyroDrdy;
 
 /**
  * @brief   SYS_UART_UP bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysUartUp;
+extern apalControlGpio_t moduleGpioSysUartUp;
 
 /**
  * @brief   ACCEL_INT input signal GPIO.
  */
-extern apalGpio_t moduleGpioAccelInt;
+extern apalControlGpio_t moduleGpioAccelInt;
 
 /**
  * @brief   SYS_SNYC bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysSync;
+extern apalControlGpio_t moduleGpioSysSync;
 
 /**
  * @brief   PATH_DCSTAT input signal GPIO.
  */
-extern apalGpio_t moduleGpioPathDcStat;
+extern apalControlGpio_t moduleGpioPathDcStat;
 
 /**
  * @brief   PATH_DCEN output signal GPIO.
  */
-extern apalGpio_t moduleGpioPathDcEn;
+extern apalControlGpio_t moduleGpioPathDcEn;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysPd;
+extern apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_REG_EN input signal GPIO.
  */
-extern apalGpio_t moduleGpioSysRegEn;
+extern apalControlGpio_t moduleGpioSysRegEn;
 
 /**
  * @brief   SYS_WARMRST bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysWarmrst;
+extern apalControlGpio_t moduleGpioSysWarmrst;
 
 /** @} */
 
@@ -297,52 +235,52 @@ extern apalGpio_t moduleGpioSysWarmrst;
 /**
  * @brief   Event flag to be set on a SYS_SYNC interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)(1 << MODULE_GPIO_INT_SYSSYNC))
+#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)1 << GPIOC_SYS_INT_N)
 
 /**
  * @brief   Event flag to be set on a SYS_WARMRST interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSWARMRST       ((eventflags_t)(1 << MODULE_GPIO_INT_SYSWARMRST))
+#define MODULE_OS_IOEVENTFLAGS_SYSWARMRST       ((eventflags_t)1 << GPIOD_SYS_WARMRST_N)
 
 /**
  * @brief   Event flag to be set on a PATH_DCSTAT interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_PATHDCSTAT       ((eventflags_t)(1 << MODULE_GPIO_INT_PATHDCSTAT))
+#define MODULE_OS_IOEVENTFLAGS_PATHDCSTAT       ((eventflags_t)1 << GPIOC_PATH_DCEN)
 
 /**
  * @brief   Event flag to be set on a COMPASS_DRDY interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_COMPASSDRDY      ((eventflags_t)(1 << MODULE_GPIO_INT_COMPASSDRDY))
+#define MODULE_OS_IOEVENTFLAGS_COMPASSDRDY      ((eventflags_t)1 << GPIOB_COMPASS_DRDY)
 
 /**
  * @brief   Event flag to be set on a SYS_PD interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)(1 << MODULE_GPIO_INT_SYSPD))
+#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)1 << GPIOC_SYS_PD_N)
 
 /**
  * @brief   Event flag to be set on a SYS_REG_EN interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSREGEN         ((eventflags_t)(1 << MODULE_GPIO_INT_SYSREGEN))
+#define MODULE_OS_IOEVENTFLAGS_SYSREGEN         ((eventflags_t)1 << GPIOC_SYS_REG_EN)
 
 /**
  * @brief   Event flag to be set on a IR_INT interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_IRINT            ((eventflags_t)(1 << MODULE_GPIO_INT_IRINT))
+#define MODULE_OS_IOEVENTFLAGS_IRINT            ((eventflags_t)1 << GPIOB_IR_INT)
 
 /**
  * @brief   Event flag to be set on a GYRO_DRDY interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_GYRODRDY         ((eventflags_t)(1 << MODULE_GPIO_INT_GYRODRDY))
+#define MODULE_OS_IOEVENTFLAGS_GYRODRDY         ((eventflags_t)1 << GPIOB_GYRO_DRDY)
 
 /**
  * @brief   Event flag to be set on a SYS_UART_UP interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSUARTUP        ((eventflags_t)(1 << MODULE_GPIO_INT_SYSUARTUP))
+#define MODULE_OS_IOEVENTFLAGS_SYSUARTUP        ((eventflags_t)1 << GPIOB_SYS_UART_UP)
 
 /**
  * @brief   Event flag to be set on a ACCEL_INT interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_ACCELINT         ((eventflags_t)(1 << MODULE_GPIO_INT_ACCELINT))
+#define MODULE_OS_IOEVENTFLAGS_ACCELINT         ((eventflags_t)1 << GPIOB_ACCEL_INT_N)
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
 /**
@@ -356,6 +294,34 @@ extern const char* moduleShellPrompt;
  */
 #define MODULE_INIT_HAL_EXTRA() {                                             \
   qeiInit();                                                                  \
+}
+
+/**
+ * @brief   Interrupt initialization macro.
+ * @note    SSSP related interrupt signals are already initialized in 'aos_system.c'.
+ */
+#define MODULE_INIT_INTERRUPTS() {                                            \
+  /* COMPASS_DRDY */                                                          \
+  palSetPadCallback(moduleGpioCompassDrdy.gpio->port, moduleGpioCompassDrdy.gpio->pad, _intCallback, &moduleGpioCompassDrdy.gpio->pad); \
+  palEnablePadEvent(moduleGpioCompassDrdy.gpio->port, moduleGpioCompassDrdy.gpio->pad, APAL2CH_EDGE(moduleGpioCompassDrdy.meta.edge));  \
+  /* IR_INT */                                                                \
+  palSetPadCallback(moduleGpioIrInt.gpio->port, moduleGpioIrInt.gpio->pad, _intCallback, &moduleGpioIrInt.gpio->pad); \
+  palEnablePadEvent(moduleGpioIrInt.gpio->port, moduleGpioIrInt.gpio->pad, APAL2CH_EDGE(moduleGpioIrInt.meta.edge));  \
+  /* GYRO_DRDY */                                                             \
+  palSetPadCallback(moduleGpioGyroDrdy.gpio->port, moduleGpioGyroDrdy.gpio->pad, _intCallback, &moduleGpioGyroDrdy.gpio->pad);  \
+  palEnablePadEvent(moduleGpioGyroDrdy.gpio->port, moduleGpioGyroDrdy.gpio->pad, APAL2CH_EDGE(moduleGpioGyroDrdy.meta.edge));   \
+  /* ACCEL_INT */                                                             \
+  palSetPadCallback(moduleGpioAccelInt.gpio->port, moduleGpioAccelInt.gpio->pad, _intCallback, &moduleGpioAccelInt.gpio->pad);  \
+  palEnablePadEvent(moduleGpioAccelInt.gpio->port, moduleGpioAccelInt.gpio->pad, APAL2CH_EDGE(moduleGpioAccelInt.meta.edge));   \
+  /* PATH_DCSTAT */                                                           \
+  palSetPadCallback(moduleGpioPathDcStat.gpio->port, moduleGpioPathDcStat.gpio->pad, _intCallback, &moduleGpioPathDcStat.gpio->pad);  \
+  palEnablePadEvent(moduleGpioPathDcStat.gpio->port, moduleGpioPathDcStat.gpio->pad, APAL2CH_EDGE(moduleGpioPathDcStat.meta.edge));   \
+  /* SYS_REG_EN */                                                            \
+  palSetPadCallback(moduleGpioSysRegEn.gpio->port, moduleGpioSysRegEn.gpio->pad, _intCallback, &moduleGpioSysRegEn.gpio->pad);  \
+  palEnablePadEvent(moduleGpioSysRegEn.gpio->port, moduleGpioSysRegEn.gpio->pad, APAL2CH_EDGE(moduleGpioSysRegEn.meta.edge));   \
+  /* SYS_WARMRST */                                                           \
+  palSetPadCallback(moduleGpioSysWarmrst.gpio->port, moduleGpioSysWarmrst.gpio->pad, _intCallback, &moduleGpioSysWarmrst.gpio->pad);  \
+  palEnablePadEvent(moduleGpioSysWarmrst.gpio->port, moduleGpioSysWarmrst.gpio->pad, APAL2CH_EDGE(moduleGpioSysWarmrst.meta.edge));   \
 }
 
 /**
@@ -431,17 +397,17 @@ extern const char* moduleShellPrompt;
 /**
  * @brief   PD signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioPd;
+#define moduleSsspGpioPd                        moduleGpioSysPd
 
 /**
  * @brief   SYNC signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioSync;
+#define moduleSsspGpioSync                      moduleGpioSysSync
 
 /**
  * @brief   UP signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioUp;
+#define moduleSsspGpioUp                        moduleGpioSysUartUp
 
 /**
  * @brief   Event flags for PD signal events.

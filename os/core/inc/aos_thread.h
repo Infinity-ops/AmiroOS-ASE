@@ -25,67 +25,67 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @brief   Minimum thread priority.
  */
-#define AOS_THD_LOWPRIO_MIN     ((tprio_t)(LOWPRIO))
+#define AOS_THD_LOWPRIO_MIN           ((tprio_t)(LOWPRIO))
 
 /**
  * @brief   Maximum priority for background threads.
  */
-#define AOS_THD_LOWPRIO_MAX     ((tprio_t)(LOWPRIO + ((NORMALPRIO - LOWPRIO) / 2)))
+#define AOS_THD_LOWPRIO_MAX           ((tprio_t)(LOWPRIO + ((NORMALPRIO - LOWPRIO) / 2)))
 
 /**
  * @brief   Minimum priority for normal/standard threads.
  */
-#define AOS_THD_NORMALPRIO_MIN  ((tprio_t)(AOS_THD_LOWPRIO_MAX + 1))
+#define AOS_THD_NORMALPRIO_MIN        ((tprio_t)(AOS_THD_LOWPRIO_MAX + 1))
 
 /**
  * @brief   Maximum priority for normal/standard threads.
  */
-#define AOS_THD_NORMALPRIO_MAX  ((tprio_t)(NORMALPRIO))
+#define AOS_THD_NORMALPRIO_MAX        ((tprio_t)(NORMALPRIO))
 
 /**
  * @brief   Minimum priority for important threads.
  */
-#define AOS_THD_HIGHPRIO_MIN    ((tprio_t)(NORMALPRIO + 1))
+#define AOS_THD_HIGHPRIO_MIN          ((tprio_t)(NORMALPRIO + 1))
 
 /**
  * @brief   Maximum priority for important threads.
  */
-#define AOS_THD_HIGHPRIO_MAX    ((tprio_t)(NORMALPRIO + ((HIGHPRIO - NORMALPRIO) / 2)))
+#define AOS_THD_HIGHPRIO_MAX          ((tprio_t)(NORMALPRIO + ((HIGHPRIO - NORMALPRIO) / 2)))
 
 /**
  * @brief   Minimum priority for real-time threads.
  */
-#define AOS_THD_RTPRIO_MIN      ((tprio_t)(AOS_THD_HIGHPRIO_MAX + 1))
+#define AOS_THD_RTPRIO_MIN            ((tprio_t)(AOS_THD_HIGHPRIO_MAX + 1))
 
 /**
  * @brief   Maximum priority for real-time threads.
  */
-#define AOS_THD_RTPRIO_MAX      ((tprio_t)(HIGHPRIO - 1))
+#define AOS_THD_RTPRIO_MAX            ((tprio_t)(HIGHPRIO - 1))
 
 /**
  * @brief   Priority for the system control thread.
  */
-#define AOS_THD_CTRLPRIO     ((tprio_t)(HIGHPRIO))
+#define AOS_THD_CTRLPRIO              ((tprio_t)(HIGHPRIO))
 
 /**
  * @brief   Maximum timeframe that can be slept in system ticks.
  */
-#define AOS_THD_MAX_SLEEP_ST    TIME_MAX_INTERVAL
+#define AOS_THD_MAX_SLEEP_ST          TIME_MAX_INTERVAL
 
 /**
  * @brief   Maximum timeframe that can be slept in seconds.
  */
-#define AOS_THD_MAX_SLEEP_S     (TIME_I2S(AOS_THD_MAX_SLEEP_ST) - 1)
+#define AOS_THD_MAX_SLEEP_S           (chTimeI2S(AOS_THD_MAX_SLEEP_ST) - 1)
 
 /**
  * @brief   Maximum timeframe that can be slept in milliseconds.
  */
-#define AOS_THD_MAX_SLEEP_MS    (TIME_I2MS(AOS_THD_MAX_SLEEP_ST) - 1)
+#define AOS_THD_MAX_SLEEP_MS          (chTimeI2MS(AOS_THD_MAX_SLEEP_ST) - 1)
 
 /**
  * @brief   Maximum timeframe that can be slept in microseconds.
  */
-#define AOS_THD_MAX_SLEEP_US    (TIME_I2US(AOS_THD_MAX_SLEEP_ST) - 1)
+#define AOS_THD_MAX_SLEEP_US          (chTimeI2US(AOS_THD_MAX_SLEEP_ST) - 1)
 
 #ifdef __cplusplus
 extern "C" {

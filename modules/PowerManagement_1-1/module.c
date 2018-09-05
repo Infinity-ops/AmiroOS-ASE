@@ -18,26 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "module.h"
 
+#include <amiroos.h>
+
 /*===========================================================================*/
 /**
  * @name Module specific functions
  * @{
  */
 /*===========================================================================*/
-#include <amiroos.h>
-
-/**
- * @brief   Interrupt service routine callback for I/O interrupt signals.
- *
- * @param   args      Channel on which the interrupt was encountered.
- */
-static void _modulePalIsrCallback(void *args) {
-  chSysLockFromISR();
-  chEvtBroadcastFlagsI(&aos.events.io, (1 << (*(uint16_t*)args)));
-  chSysUnlockFromISR();
-
-  return;
-}
 
 /** @} */
 
@@ -67,126 +55,6 @@ ADCConversionGroup moduleHalAdcVsysConversionGroup = {
 CANConfig moduleHalCanConfig = {
   /* mcr  */ CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
   /* btr  */ CAN_BTR_SJW(1) | CAN_BTR_TS2(3) | CAN_BTR_TS1(15) | CAN_BTR_BRP(1),
-};
-
-aos_interrupt_cfg_t moduleIntConfig[14] = {
-    /* channel  1 */ { // IR_INT1_N: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_IR_INT1_N,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(VCNL4020_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 1,
-    },
-    /* channel  2 */ { // GAUGE_BATLOW1: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_GAUGE_BATLOW1,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_RISING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 2,
-    },
-    /* channel  3 */ { // GAUGE_BATGD1_N: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_GAUGE_BATGD1_N,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_RISING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 3,
-    },
-    /* channel  4 */ { // SYS_UART_DN: automatic interrupt on event
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_SYS_UART_DN,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 4,
-    },
-    /* channel  5 */ { // IR_INT2_N: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_IR_INT2_N,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(VCNL4020_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 5,
-    },
-    /* channel  6 */ { // TOUCH_INT: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_TOUCH_INT_N,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(MPR121_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 6,
-    },
-    /* channel  7 */ { // GAUGE_BATLOW2: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_GAUGE_BATLOW2,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_RISING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 7,
-    },
-    /* channel  8 */ { // GAUGE_BATGD2_N: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_GAUGE_BATGD2_N,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_RISING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 8,
-    },
-    /* channel  9 */ { // PATH_DC: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_PATH_DC,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 9,
-    },
-    /* channel 10 */ { // SYS_SPI_DIR: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_SPI_DIR,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 10,
-    },
-    /* channel 11 */ { // SYS_SYNC_N: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_INT_N, // TODO: check this
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 11,
-    },
-    /* channel 12 */ { // SYS_PD_N: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_PD_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 12,
-    },
-    /* channel 13 */ { // SYS_WARMRST_N: must be enabled explicitely
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_WARMRST_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 13,
-    },
-    /* channel 14 */ { // SYS_UART_UP: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_SYS_UART_UP,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 14,
-    },
-};
-
-aos_interrupt_driver_t moduleIntDriver = {
-  /* config     */ NULL,
-  /* interrupts */ 14,
 };
 
 I2CConfig moduleHalI2cProxPm18Pm33GaugeRearConfig = {
@@ -246,124 +114,388 @@ SerialConfig moduleHalProgIfConfig = {
  */
 /*===========================================================================*/
 
-apalGpio_t moduleGpioSysRegEn = {
+/**
+ * @brief   SYS_REG_EN output signal GPIO.
+ */
+static apalGpio_t _gpioSysRegEn = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_SYS_REG_EN,
 };
+apalControlGpio_t moduleSysRegEn = {
+  /* GPIO */ &_gpioSysRegEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioIrInt1 = {
+/**
+ * @brief   IR_INT1 input signal GPIO.
+ */
+static apalGpio_t _gpioIrInt1 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_IR_INT1_N,
 };
+apalControlGpio_t moduleGpioIrInt1 = {
+  /* GPIO */ &_gpioIrInt1,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (VCNL4020_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ VCNL4020_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioPowerEn = {
+/**
+ * @brief   POWER_EN output signal GPIO.
+ */
+static apalGpio_t _gpioPowerEn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_POWER_EN,
 };
+apalControlGpio_t moduleGpioPowerEn = {
+  /* GPIO */ &_gpioPowerEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioSysUartDn = {
+/**
+ * @brief   SYS_UART_DN bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysUartDn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_DN,
 };
+apalControlGpio_t moduleGpioSysUartDn = {
+  /* GPIO */ &_gpioSysUartDn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioChargeStat2A = {
+/**
+ * @brief   CHARGE_STAT2A input signal GPIO.
+ */
+static apalGpio_t _gpioChargeStat2A = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_CHARGE_STAT2A,
 };
+apalControlGpio_t moduleGpioChargeStat2A = {
+  /* GPIO */ &_gpioChargeStat2A,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ24103A_LLD_CHARGE_STATUS_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioGaugeBatLow2 = {
+/**
+ * @brief   GAUGE_BATLOW2 input signal GPIO.
+ */
+static apalGpio_t _gpioGaugeBatLow2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GAUGE_BATLOW2,
 };
+apalControlGpio_t moduleGpioGaugeBatLow2 = {
+  /* GPIO */ &_gpioGaugeBatLow2,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ27500_LLD_BATLOW_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioGaugeBatGd2 = {
+/**
+ * @brief   GAUGE_BATGD2 input signal GPIO.
+ */
+static apalGpio_t _gpioGaugeBatGd2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GAUGE_BATGD2_N,
 };
+apalControlGpio_t moduleGpioGaugeBatGd2 = {
+  /* GPIO */ &_gpioGaugeBatGd2,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ27500_LLD_BATGOOD_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioLed = {
+/**
+ * @brief   LED output signal GPIO.
+ */
+static apalGpio_t _gpioLed = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LED,
 };
+apalControlGpio_t moduleGpioLed = {
+  /* GPIO */ &_gpioLed,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ LED_LLD_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioSysUartUp = {
+/**
+ * @brief   SYS_UART_UP bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysUartUp = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_UP,
 };
+apalControlGpio_t moduleGpioSysUartUp = {
+  /* GPIO */ &_gpioSysUartUp,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioChargeStat1A = {
+/**
+ * @brief   CHARGE_STAT1A input signal GPIO.
+ */
+static apalGpio_t _gpioChargeStat1A = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_CHARGE_STAT1A,
 };
+apalControlGpio_t moduleGpioChargeStat1A = {
+  /* GPIO */ &_gpioChargeStat1A,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ24103A_LLD_CHARGE_STATUS_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioGaugeBatLow1 = {
+/**
+ * @brief   GAUGE_BATLOW1 input signal GPIO.
+ */
+static apalGpio_t _gpioGaugeBatLow1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_GAUGE_BATLOW1,
 };
+apalControlGpio_t moduleGpioGaugeBatLow1 = {
+  /* GPIO */ &_gpioGaugeBatLow1,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ27500_LLD_BATLOW_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioGaugeBatGd1 = {
+/**
+ * @brief   GAUGE_BATGD1 input signal GPIO.
+ */
+static apalGpio_t _gpioGaugeBatGd1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_GAUGE_BATGD1_N,
 };
+apalControlGpio_t moduleGpioGaugeBatGd1 = {
+  /* GPIO */ &_gpioGaugeBatGd1,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ BQ27500_LLD_BATGOOD_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioChargeEn1 = {
+/**
+ * @brief   CHARG_EN1 output signal GPIO.
+ */
+static apalGpio_t _gpioChargeEn1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_CHARGE_EN1_N,
 };
+apalControlGpio_t moduleGpioChargeEn1 = {
+  /* GPIO */ &_gpioChargeEn1,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ BQ24103A_LLD_ENABLED_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioIrInt2 = {
+/**
+ * @brief   IR_INT2 input signal GPIO.
+ */
+static apalGpio_t _gpioIrInt2 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_IR_INT2_N,
 };
+apalControlGpio_t moduleGpioIrInt2 = {
+  /* GPIO */ &_gpioIrInt2,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (VCNL4020_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ VCNL4020_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioTouchInt = {
+/**
+ * @brief   TOUCH_INT input signal GPIO.
+ */
+static apalGpio_t _gpioTouchInt = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_TOUCH_INT_N,
 };
+apalControlGpio_t moduleGpioTouchInt = {
+  /* GPIO */ &_gpioTouchInt,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (MPR121_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ MPR121_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioSysDone = {
+/**
+ * @brief   SYS_DONE input signal GPIO.
+ */
+static apalGpio_t _gpioSysDone = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_DONE,
 };
+apalControlGpio_t moduleGpioSysDone = {
+  /* GPIO */ &_gpioSysDone,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioSysProg = {
+/**
+ * @brief   SYS_PROG output signal GPIO.
+ */
+static apalGpio_t _gpioSysProg = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PROG_N,
 };
+apalControlGpio_t moduleGpioSysProg = {
+  /* GPIO */ &_gpioSysProg,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioPathDc = {
+/**
+ * @brief   PATH_DC input signal GPIO.
+ */
+static apalGpio_t _gpioPathDc = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DC,
 };
+apalControlGpio_t moduleGpioPathDc = {
+  /* GPIO */ &_gpioPathDc,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysSpiDir = {
+/**
+ * @brief   SYS_SPI_DIR bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysSpiDir = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_SPI_DIR,
 };
+apalControlGpio_t moduleGpioSysSpiDir = {
+  /* GPIO */ &_gpioSysSpiDir,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_FALLING,
+  },
+};
 
-apalGpio_t moduleGpioSysSync = {
+/**
+ * @brief   SYS_SYNC bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysSync = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_INT_N,
 };
+apalControlGpio_t moduleGpioSysSync = {
+  /* GPIO */ &_gpioSysSync,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysPd = {
+/**
+ * @brief   SYS_PD bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
+apalControlGpio_t moduleGpioSysPd = {
+  /* GPIO */ &_gpioSysPd,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysWarmrst = {
+/**
+ * @brief   SYS_WARMRST bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysWarmrst = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_WARMRST_N,
 };
+apalControlGpio_t moduleGpioSysWarmrst = {
+  /* GPIO */ &_gpioSysWarmrst,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioBtRst = {
+/**
+ * @brief   BT_RST output signal GPIO.
+ */
+static apalGpio_t _gpioBtRst = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_BT_RST,
 };
+apalControlGpio_t moduleGpioBtRst = {
+  /* GPIO */ &_gpioBtRst,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioChargeEn2 = {
+/**
+ * @brief   CHARGE_EN2 output signal GPIO.
+ */
+static apalGpio_t _gpioChargeEn2 = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_CHARGE_EN2_N,
+};
+apalControlGpio_t moduleGpioChargeEn2 = {
+  /* GPIO */ &_gpioChargeEn2,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ BQ24103A_LLD_ENABLED_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
 };
 
 /** @} */
@@ -388,42 +520,6 @@ const char* moduleShellPrompt = "PowerManagement";
  */
 /*===========================================================================*/
 
-apalControlGpio_t moduleSsspGpioPd = {
-  /* GPIO */ &moduleGpioSysPd,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioSync = {
-  /* GPIO */ &moduleGpioSysSync,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioDn = {
-  /* GPIO */ &moduleGpioSysUartDn,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioUp = {
-  /* GPIO */ &moduleGpioSysUartUp,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
 /** @} */
 
 /*===========================================================================*/
@@ -439,81 +535,25 @@ AT24C01BNDriver moduleLldEeprom = {
 };
 
 BQ24103ADriver moduleLldBatteryChargerFront = {
-  /* charge enable GPIO */ {
-    /* GPIO */ &moduleGpioChargeEn1,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
-  /* charge status GPIO */ {
-    /* GPIO */ &moduleGpioChargeStat1A,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* charge enable GPIO */ &moduleGpioChargeEn1,
+  /* charge status GPIO */ &moduleGpioChargeStat1A,
 };
 
 BQ24103ADriver moduleLldBatteryChargerRear = {
-  /* charge enable GPIO */ {
-    /* GPIO */ &moduleGpioChargeEn2,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
-  /* charge status GPIO */ {
-    /* GPIO */ &moduleGpioChargeStat2A,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* charge enable GPIO */ &moduleGpioChargeEn2,
+  /* charge status GPIO */ &moduleGpioChargeStat2A,
 };
 
 BQ27500Driver moduleLldFuelGaugeFront = {
-  /* I2C driver       */ &MODULE_HAL_I2C_PROX_PM42_PM50_PMVDD_EEPROM_TOUCH_GAUGEFRONT,
-  /* battery low GPIO */ {
-    /* GPIO */ &moduleGpioGaugeBatLow1,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
-  /* battery good GPIO */ {
-    /* GPIO */ &moduleGpioGaugeBatGd1,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* I2C driver         */ &MODULE_HAL_I2C_PROX_PM42_PM50_PMVDD_EEPROM_TOUCH_GAUGEFRONT,
+  /* battery low GPIO   */ &moduleGpioGaugeBatLow1,
+  /* battery good GPIO  */ &moduleGpioGaugeBatGd1,
 };
 
 BQ27500Driver moduleLldFuelGaugeRear = {
-  /* I2C driver       */ &MODULE_HAL_I2C_PROX_PM18_PM33_GAUGEREAR,
-  /* battery low GPIO */ {
-    /* GPIO */ &moduleGpioGaugeBatLow2,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
-  /* battery good GPIO */ {
-    /* GPIO */ &moduleGpioGaugeBatGd2,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* I2C driver         */ &MODULE_HAL_I2C_PROX_PM18_PM33_GAUGEREAR,
+  /* battery low GPIO   */ &moduleGpioGaugeBatLow2,
+  /* battery good GPIO  */ &moduleGpioGaugeBatGd2,
 };
 
 INA219Driver moduleLldPowerMonitorVdd = {
@@ -552,14 +592,7 @@ INA219Driver moduleLldPowerMonitorVio50 = {
 };
 
 LEDDriver moduleLldStatusLed = {
-  /* LED GPIO */ {
-    /* GPIO */ &moduleGpioLed,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* LED GPIO */ &moduleGpioLed,
 };
 
 MPR121Driver moduleLldTouch = {
@@ -577,14 +610,7 @@ PCA9544ADriver moduleLldI2cMultiplexer2 = {
 };
 
 TPS62113Driver moduleLldStepDownConverter = {
-  /* Power enable GPIO */ {
-    /* GPIO       */ &moduleGpioPowerEn,
-    /* GPIO meta  */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* egde         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* Power enable GPIO */ &moduleGpioPowerEn,
 };
 
 VCNL4020Driver moduleLldProximity1 = {
@@ -899,16 +925,14 @@ static int _utShellCmdCb_AlldMpr121(BaseSequentialStream* stream, int argc, char
 {
   (void)argc;
   (void)argv;
-  aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_TOUCHINT);
   aosUtRun(stream, &moduleUtAlldMpr121, NULL);
-  aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_TOUCHINT);
   return AOS_OK;
 }
 static ut_mpr121data_t _utAlldMpr121Data= {
   /* MPR121 driver  */ &moduleLldTouch,
   /* timeout        */ MICROSECONDS_PER_SECOND,
   /* event source   */ &aos.events.io,
-  /* event flags    */ (1 << MODULE_GPIO_INT_TOUCHINT),
+  /* event flags    */ MODULE_OS_IOEVENTFLAGS_TOUCHINT,
 };
 aos_unittest_t moduleUtAlldMpr121 = {
   /* name           */ "MPR121",
@@ -1082,8 +1106,7 @@ static int _utShellCmdCb_AlldVcnl4020(BaseSequentialStream* stream, int argc, ch
       case WNW:
         mux = &moduleLldI2cMultiplexer1;
         ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->vcnld = &moduleLldProximity1;
-        ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->evtflags = (1 << MODULE_GPIO_INT_IRINT2);
-        aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_IRINT2);
+        ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->evtflags = MODULE_OS_IOEVENTFLAGS_IRINT2;
         break;
       case NNW:
       case NNE:
@@ -1091,8 +1114,7 @@ static int _utShellCmdCb_AlldVcnl4020(BaseSequentialStream* stream, int argc, ch
       case ESE:
         mux = &moduleLldI2cMultiplexer2;
         ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->vcnld = &moduleLldProximity2;
-        ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->evtflags = (1 << MODULE_GPIO_INT_IRINT1);
-        aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_IRINT1);
+        ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->evtflags = MODULE_OS_IOEVENTFLAGS_IRINT1;
         break;
       default:
         break;
@@ -1109,42 +1131,34 @@ static int _utShellCmdCb_AlldVcnl4020(BaseSequentialStream* stream, int argc, ch
       case NNE:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH1, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "north-northeast sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT1);
         break;
       case ENE:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH3, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "east-northeast sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT1);
         break;
       case ESE:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH2, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "north-southeast sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT1);
         break;
       case SSE:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH0, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "south-southeast sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT2);
         break;
       case SSW:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH1, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "south-southwest sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT2);
         break;
       case WSW:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH3, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "west-southwest sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT2);
         break;
       case WNW:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH2, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "west-northwest sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT2);
         break;
       case NNW:
         pca9544a_lld_setchannel(mux, PCA9544A_LLD_CH0, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
         aosUtRun(stream, &moduleUtAlldVcnl4020, "north-northwest sensor");
-        aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT1);
         break;
       default:
         break;

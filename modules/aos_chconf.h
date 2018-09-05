@@ -36,10 +36,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /*===========================================================================*/
 /**
  * @name System timers settings
+ * @{
  */
 /*===========================================================================*/
 
-// These settings are specific to each module.
+/**
+ * @brief   System tick frequency.
+ * @details Frequency of the system timer that drives the system ticks. This
+ *          setting also defines the system tick time unit.
+ */
+#if !defined(CH_CFG_ST_FREQUENCY)
+#define CH_CFG_ST_FREQUENCY                 1000000UL
+#endif
+
+/**
+ * @brief   Time intervals data size.
+ * @note    Allowed values are 16, 32 or 64 bits.
+ */
+#if !defined(CH_CFG_INTERVALS_SIZE)
+#define CH_CFG_INTERVALS_SIZE               32
+#endif
+
+/**
+ * @brief   Time types data size.
+ * @note    Allowed values are 16 or 32 bits.
+ */
+#if !defined(CH_CFG_TIME_TYPES_SIZE)
+#define CH_CFG_TIME_TYPES_SIZE              32
+#endif
+
+/**
+ * @brief   Time delta constant for the tick-less mode.
+ * @note    If this value is zero then the system uses the classic
+ *          periodic tick. This value represents the minimum number
+ *          of ticks that is safe to specify in a timeout directive.
+ *          The value one is not valid, timeouts are rounded up to
+ *          this value.
+ */
+#if !defined(CH_CFG_ST_TIMEDELTA)
+#define CH_CFG_ST_TIMEDELTA                 20
+#endif
+
+/** @} */
 
 /*===========================================================================*/
 /**
@@ -244,14 +282,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CH_CFG_USE_MAILBOXES                FALSE
 
 /**
- * @brief   I/O Queues APIs.
- * @details If enabled then the I/O queues APIs are included in the kernel.
- *
- * @note    The default is @p TRUE.
- */
-#define CH_CFG_USE_QUEUES                   FALSE
-
-/**
  * @brief   Core Memory Manager APIs.
  * @details If enabled then the core memory manager APIs are included
  *          in the kernel.
@@ -282,6 +312,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CH_CFG_USE_MEMPOOLS                 FALSE
 
 /**
+ * @brief  Objects FIFOs APIs.
+ * @details If enabled then the objects FIFOs APIs are included
+ *          in the kernel.
+ *
+ * @note    The default is @p TRUE.
+ */
+#if !defined(CH_CFG_USE_OBJ_FIFOS)
+#define CH_CFG_USE_OBJ_FIFOS                FALSE
+#endif
+
+/**
  * @brief   Dynamic Threads APIs.
  * @details If enabled then the dynamic threads creation APIs are included
  *          in the kernel.
@@ -291,6 +332,70 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @note    Requires @p CH_CFG_USE_HEAP and/or @p CH_CFG_USE_MEMPOOLS.
  */
 #define CH_CFG_USE_DYNAMIC                  FALSE
+
+/** @} */
+
+/*===========================================================================*/
+/**
+ * @name Objects factory options
+ * @{
+ */
+/*===========================================================================*/
+
+/**
+ * @brief   Objects Factory APIs.
+ * @details If enabled then the objects factory APIs are included in the
+ *          kernel.
+ *
+ * @note    The default is @p FALSE.
+ */
+#if !defined(CH_CFG_USE_FACTORY)
+#define CH_CFG_USE_FACTORY                  FALSE
+#endif
+
+/**
+ * @brief   Maximum length for object names.
+ * @details If the specified length is zero then the name is stored by
+ *          pointer but this could have unintended side effects.
+ */
+#if !defined(CH_CFG_FACTORY_MAX_NAMES_LENGTH)
+#define CH_CFG_FACTORY_MAX_NAMES_LENGTH     8
+#endif
+
+/**
+ * @brief   Enables the registry of generic objects.
+ */
+#if !defined(CH_CFG_FACTORY_OBJECTS_REGISTRY)
+#define CH_CFG_FACTORY_OBJECTS_REGISTRY     TRUE
+#endif
+
+/**
+ * @brief   Enables factory for generic buffers.
+ */
+#if !defined(CH_CFG_FACTORY_GENERIC_BUFFERS)
+#define CH_CFG_FACTORY_GENERIC_BUFFERS      TRUE
+#endif
+
+/**
+ * @brief   Enables factory for semaphores.
+ */
+#if !defined(CH_CFG_FACTORY_SEMAPHORES)
+#define CH_CFG_FACTORY_SEMAPHORES           TRUE
+#endif
+
+/**
+ * @brief   Enables factory for mailboxes.
+ */
+#if !defined(CH_CFG_FACTORY_MAILBOXES)
+#define CH_CFG_FACTORY_MAILBOXES            TRUE
+#endif
+
+/**
+ * @brief   Enables factory for objects FIFOs.
+ */
+#if !defined(CH_CFG_FACTORY_OBJ_FIFOS)
+#define CH_CFG_FACTORY_OBJ_FIFOS            TRUE
+#endif
 
 /** @} */
 
@@ -422,6 +527,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /*===========================================================================*/
 
 /**
+ * @brief   System structure extension.
+ * @details User fields added to the end of the @p ch_system_t structure.
+ */
+#define CH_CFG_SYSTEM_EXTRA_FIELDS                                          \
+  /* Add threads custom fields here.*/
+
+/**
+ * @brief   System initialization hook.
+ * @details User initialization code added to the @p chSysInit() function
+ *          just before interrupts are enabled globally.
+ */
+#define CH_CFG_SYSTEM_INIT_HOOK() {                                         \
+  /* Add threads initialization code here.*/                                \
+}
+
+/**
  * @brief   Threads descriptor structure extension.
  * @details User fields added to the end of the @p thread_t structure.
  */
@@ -430,9 +551,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @brief   Threads initialization hook.
- * @details User initialization code added to the @p chThdInit() API.
+ * @details User initialization code added to the @p _thread_init() function.
  *
- * @note    It is invoked from within @p chThdInit() and implicitly from all
+ * @note    It is invoked from within @p _thread_init() and implicitly from all
  *          the threads creation APIs.
  */
 #define CH_CFG_THREAD_INIT_HOOK(tp) {                                       \
@@ -442,10 +563,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @brief   Threads finalization hook.
  * @details User finalization code added to the @p chThdExit() API.
- *
- * @note    It is inserted into lock zone.
- * @note    It is also invoked when the threads simply return in order to
- *          terminate.
  */
 #define CH_CFG_THREAD_EXIT_HOOK(tp) {                                       \
   /* Add threads finalization code here.*/                                  \
@@ -516,8 +633,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *          the system is halted.
  */
 #define CH_CFG_SYSTEM_HALT_HOOK(reason) {                                   \
-  extern void aosPrintHaltErrorCode(const char* reason);                       \
-  aosPrintHaltErrorCode(reason);                                               \
+  extern void aosPrintHaltErrorCode(const char* reason);                    \
+  aosPrintHaltErrorCode(reason);                                            \
 }
 
 /**
@@ -547,7 +664,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /*===========================================================================*/
 
 /**
- * @brief   Flag to enable/disable floating point support in chprinf()
+ * @brief   Flag to enable/disable floating point support in chprintf() and all deriviates.
  */
 #define CHPRINTF_USE_FLOAT                  TRUE
 

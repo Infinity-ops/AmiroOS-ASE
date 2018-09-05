@@ -18,26 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "module.h"
 
+#include <amiroos.h>
+
 /*===========================================================================*/
 /**
  * @name Module specific functions
  * @{
  */
 /*===========================================================================*/
-#include <amiroos.h>
-
-/**
- * @brief   Interrupt service routine callback for I/O interrupt signals.
- *
- * @param   args      Channel on which the interrupt was encountered.
- */
-static void _modulePalIsrCallback(void *args) {
-  chSysLockFromISR();
-  chEvtBroadcastFlagsI(&aos.events.io, (1 << (*(uint16_t*)args)));
-  chSysUnlockFromISR();
-
-  return;
-}
 
 /** @} */
 
@@ -51,94 +39,6 @@ static void _modulePalIsrCallback(void *args) {
 CANConfig moduleHalCanConfig = {
   /* mcr  */ CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
   /* btr  */ CAN_BTR_SJW(1) | CAN_BTR_TS2(2) | CAN_BTR_TS1(13) | CAN_BTR_BRP(1),
-};
-
-aos_interrupt_cfg_t moduleIntConfig[10] = {
-    /* channel  1 */ { // SYS_INT_N/SYS_SYNC_N: automatic interrupt on event
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_INT_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 1,
-    },
-    /* channel  2 */ { // SYS_WARMRST_N: automatic interrupt when activated
-      /* port     */ GPIOD,
-      /* pad      */ GPIOD_SYS_WARMRST_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 2,
-    },
-    /* channel  3 */ { // PATH_DCSTAT: must be enabled explicitely when charging is in progress to detect unexpected voltage drop
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_PATH_DCSTAT,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 3,
-    },
-    /* channel  5 */ { // COMPASS_DRDY: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_COMPASS_DRDY,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(HMC5883L_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 4,
-    },
-    /* channel  8 */ { // SYS_PD_N: automatic interrupt when activated
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_PD_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 5,
-    },
-    /* channel  9 */ { // SYS_REG_EN: automatic interrupt when activated
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_REG_EN,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 6,
-    },
-    /* channel 12 */ { // IR_INT: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_IR_INT,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(VCNL4020_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 7,
-    },
-    /* channel 13 */ { // GYRO_DRDY: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_GYRO_DRDY,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(L3G4200D_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 8,
-    },
-    /* channel 14 */ { // SYS_UART_UP: automatic interrupt on event
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_SYS_UART_UP,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 9,
-    },
-    /* channel 15 */ { // ACCEL_INT_N: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_ACCEL_INT_N,
-      /* flags    */ 0,
-      /* mode     */ APAL2CH_EDGE(LIS331DLH_LLD_INT_EDGE),
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 10,
-    },
-};
-
-aos_interrupt_driver_t moduleIntDriver = {
-  /* config     */ NULL,
-  /* interrupts */ 10,
 };
 
 I2CConfig moduleHalI2cCompassConfig = {
@@ -229,69 +129,212 @@ SPIConfig moduleHalSpiGyroscopeConfig = {
  */
 /*===========================================================================*/
 
-apalGpio_t moduleGpioLed = {
+/**
+ * @brief   LED output signal GPIO.
+ */
+static apalGpio_t _gpioLed = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_LED,
 };
-
-apalGpio_t moduleGpioPowerEn = {
-  /* port */GPIOB,
-  /* pad  */  GPIOB_POWER_EN,
+apalControlGpio_t moduleGpioLed = {
+  /* GPIO */ &_gpioLed,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ LED_LLD_GPIO_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
 };
 
-apalGpio_t moduleGpioCompassDrdy = {
+/**
+ * @brief   POWER_EN output signal GPIO.
+ */
+static apalGpio_t _gpioPowerEn = {
+  /* port */ GPIOB,
+  /* pad  */  GPIOB_POWER_EN,
+};
+apalControlGpio_t moduleGpioPowerEn = {
+  /* GPIO */ &_gpioPowerEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
+
+/**
+ * @brief   COMPASS_DRDY output signal GPIO.
+ */
+static apalGpio_t _gpioCompassDrdy = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_COMPASS_DRDY,
 };
+apalControlGpio_t moduleGpioCompassDrdy = {
+  /* GPIO */ &_gpioCompassDrdy,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (L3G4200D_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ L3G4200D_LLD_INT_EDGE,
+  },
+};
 
- apalGpio_t moduleGpioIrInt = {
+/**
+ * @brief   IR_INT input signal GPIO.
+ */
+static apalGpio_t _gpioIrInt = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_IR_INT,
 };
+apalControlGpio_t moduleGpioIrInt = {
+  /* GPIO */ &_gpioIrInt,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (VCNL4020_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ VCNL4020_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioGyroDrdy = {
+/**
+ * @brief   GYRO_DRDY input signal GPIO.
+ */
+static apalGpio_t _gpioGyroDrdy = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GYRO_DRDY,
 };
+apalControlGpio_t moduleGpioGyroDrdy = {
+  /* GPIO */ &_gpioGyroDrdy,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (L3G4200D_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ L3G4200D_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioSysUartUp = {
+/**
+ * @brief   SYS_UART_UP bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysUartUp = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_UP,
 };
+apalControlGpio_t moduleGpioSysUartUp = {
+  /* GPIO */ &_gpioSysUartUp,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioAccelInt = {
+/**
+ * @brief   ACCEL_INT input signal GPIO.
+ */
+static apalGpio_t _gpioAccelInt = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_ACCEL_INT_N,
 };
+apalControlGpio_t moduleGpioAccelInt = {
+  /* GPIO */ &_gpioAccelInt,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ (LIS331DLH_LLD_INT_EDGE == APAL_GPIO_EDGE_RISING) ? APAL_GPIO_ACTIVE_HIGH : APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ LIS331DLH_LLD_INT_EDGE,
+  },
+};
 
-apalGpio_t moduleGpioSysSync = {
+/**
+ * @brief   SYS_SNYC bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysSync = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_INT_N,
 };
+apalControlGpio_t moduleGpioSysSync = {
+  /* GPIO */ &_gpioSysSync,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioPathDcStat = {
+/**
+ * @brief   PATH_DCSTAT input signal GPIO.
+ */
+static apalGpio_t _gpioPathDcStat = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DCSTAT,
 };
+apalControlGpio_t moduleGpioPathDcStat = {
+  /* GPIO */ &_gpioPathDcStat,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ LTC4412_LLD_STAT_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioPathDcEn = {
+/**
+ * @brief   PATH_DCEN output signal GPIO.
+ */
+static apalGpio_t _gpioPathDcEn = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DCEN,
 };
+apalControlGpio_t moduleGpioPathDcEn = {
+  /* GPIO */ &_gpioPathDcEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ LTC4412_LLD_CTRL_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioSysPd = {
+/**
+ * @brief   SYS_PD bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
+apalControlGpio_t moduleGpioSysPd = {
+  /* GPIO */ &_gpioSysPd,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysRegEn = {
+/**
+ * @brief   SYS_REG_EN input signal GPIO.
+ */
+static apalGpio_t _gpioSysRegEn = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_REG_EN,
 };
+apalControlGpio_t moduleGpioSysRegEn = {
+  /* GPIO */ &_gpioSysRegEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysWarmrst = {
+/**
+ * @brief   SYS_WARMRST bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysWarmrst = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_SYS_WARMRST_N,
+};
+apalControlGpio_t moduleGpioSysWarmrst = {
+  /* GPIO */ &_gpioSysWarmrst,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
 };
 
 /** @} */
@@ -316,33 +359,6 @@ const char* moduleShellPrompt = "DiWheelDrive";
  */
 /*===========================================================================*/
 
-apalControlGpio_t moduleSsspGpioPd = {
-  /* GPIO */ &moduleGpioSysPd,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioSync = {
-  /* GPIO */ &moduleGpioSysSync,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioUp = {
-  /* GPIO */ &moduleGpioSysUartUp,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
 /** @} */
 
 /*===========================================================================*/
@@ -353,14 +369,7 @@ apalControlGpio_t moduleSsspGpioUp = {
 /*===========================================================================*/
 
 A3906Driver moduleLldMotors = {
-  /* power enable GPIO  */ {
-    /* GPIO */& moduleGpioPowerEn,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* power enable GPIO  */ &moduleGpioPowerEn,
 };
 
 AT24C01BNDriver moduleLldEeprom = {
@@ -384,14 +393,7 @@ L3G4200DDriver moduleLldGyroscope = {
 };
 
 LEDDriver moduleLldStatusLed = {
-  /* LED enable Gpio */ {
-    /* GPIO       */ &moduleGpioLed,
-    /* GPIO meta  */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* LED enable Gpio */ &moduleGpioLed,
 };
 
 LIS331DLHDriver moduleLldAccelerometer = {
@@ -399,22 +401,8 @@ LIS331DLHDriver moduleLldAccelerometer = {
 };
 
 LTC4412Driver moduleLldPowerPathController = {
-  /* Control GPIO */ {
-    /* GPIO       */ &moduleGpioPathDcEn,
-    /* GPIO meta  */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
-  /* Status GPIO */ {
-    /* GPIO       */ &moduleGpioPathDcStat,
-    /* GPIO meta  */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* Control GPIO */ &moduleGpioPathDcEn,
+  /* Status GPIO  */ &moduleGpioPathDcStat,
 };
 
 PCA9544ADriver moduleLldI2cMultiplexer = {
@@ -423,14 +411,7 @@ PCA9544ADriver moduleLldI2cMultiplexer = {
 };
 
 TPS62113Driver moduleLldStepDownConverterVdrive = {
-  /* Power enable Gpio */ {
-    /* GPIO       */ &moduleGpioPowerEn,
-    /* GPIO meta  */ {
-      /* 'power on' state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge             */ APAL_GPIO_EDGE_NONE,
-      /* direction        */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* Power enable Gpio */ &moduleGpioPowerEn,
 };
 
 VCNL4020Driver moduleLldProximity = {
@@ -474,7 +455,7 @@ static ut_a3906data_t _utA3906Data = {
     /* increment per revolution */ MODULE_HAL_QEI_INCREMENTS_PER_REVOLUTION,
   },
   /* Wheel diameter   */ 0.05571f,
-  /* timeout          */ 10* MICROSECONDS_PER_SECOND,
+  /* timeout          */ 10 * MICROSECONDS_PER_SECOND,
 };
 aos_unittest_t moduleUtAlldA3906  = {
   /* name           */ "A3906",
@@ -517,15 +498,13 @@ static int _utShellCmdCb_AlldHmc5883l(BaseSequentialStream* stream, int argc, ch
 {
   (void)argc;
   (void)argv;
-  aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_COMPASSDRDY);
   aosUtRun(stream, &moduleUtAlldHmc5883l, NULL);
-  aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_COMPASSDRDY);
   return AOS_OK;
 }
 static ut_hmc5883ldata_t _utHmc5883lData = {
   /* HMC driver   */ &moduleLldCompass,
   /* event source */ &aos.events.io,
-  /* event flags  */ (1 << MODULE_GPIO_INT_COMPASSDRDY),
+  /* event flags  */ MODULE_OS_IOEVENTFLAGS_COMPASSDRDY,
   /* timeout      */ MICROSECONDS_PER_SECOND,
 };
 aos_unittest_t moduleUtAlldHmc5883l = {
@@ -571,18 +550,16 @@ static int _utShellCmdCb_AlldL3g4200d(BaseSequentialStream* stream, int argc, ch
 {
   (void)argc;
   (void)argv;
-  aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_GYRODRDY);
   spiStart(((ut_l3g4200ddata_t*)moduleUtAlldL3g4200d.data)->l3gd->spid, ((ut_l3g4200ddata_t*)moduleUtAlldL3g4200d.data)->spiconf);
   aosUtRun(stream, &moduleUtAlldL3g4200d, NULL);
   spiStop(((ut_l3g4200ddata_t*)moduleUtAlldL3g4200d.data)->l3gd->spid);
-  aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_GYRODRDY);
   return AOS_OK;
 }
 static ut_l3g4200ddata_t _utL3g4200dData = {
   /* driver            */ &moduleLldGyroscope,
   /* SPI configuration */ &moduleHalSpiGyroscopeConfig,
   /* event source */ &aos.events.io,
-  /* event flags  */ (1 << MODULE_GPIO_INT_GYRODRDY),
+  /* event flags  */ MODULE_OS_IOEVENTFLAGS_GYRODRDY,
 };
 aos_unittest_t moduleUtAlldL3g4200d = {
   /* name           */ "L3G4200D",
@@ -621,18 +598,16 @@ static int _utShellCmdCb_AlldLis331dlh(BaseSequentialStream* stream, int argc, c
 {
   (void)argc;
   (void)argv;
-  aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_ACCELINT);
   spiStart(((ut_lis331dlhdata_t*)moduleUtAlldLis331dlh.data)->lisd->spid, ((ut_lis331dlhdata_t*)moduleUtAlldLis331dlh.data)->spiconf);
   aosUtRun(stream, &moduleUtAlldLis331dlh, NULL);
   spiStop(((ut_lis331dlhdata_t*)moduleUtAlldLis331dlh.data)->lisd->spid);
-  aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_ACCELINT);
   return AOS_OK;
 }
 static ut_lis331dlhdata_t _utLis331dlhData = {
   /* driver            */ &moduleLldAccelerometer,
   /* SPI configuration */ &moduleHalSpiAccelerometerConfig,
   /* event source */ &aos.events.io,
-  /* event flags  */ (1 << MODULE_GPIO_INT_ACCELINT),
+  /* event flags  */ MODULE_OS_IOEVENTFLAGS_ACCELINT,
 };
 aos_unittest_t moduleUtAlldLis331dlh = {
   /* name           */ "LIS331DLH",
@@ -748,11 +723,10 @@ static int _utShellCmdCb_AlldVcnl4020(BaseSequentialStream* stream, int argc, ch
     _utAlldVcnl4020_disableInterrupt(((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->vcnld);
     pca9544a_lld_setchannel(&moduleLldI2cMultiplexer, PCA9544A_LLD_CH3, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
     _utAlldVcnl4020_disableInterrupt(((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->vcnld);
-    aosIntEnable(&moduleIntDriver, MODULE_GPIO_INT_IRINT);
     switch (sensor) {
       case FL:
         pca9544a_lld_setchannel(&moduleLldI2cMultiplexer, PCA9544A_LLD_CH3, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
-        aosUtRun(stream, &moduleUtAlldVcnl4020, "front left snesor");
+        aosUtRun(stream, &moduleUtAlldVcnl4020, "front left sensor");
         break;
       case FR:
         pca9544a_lld_setchannel(&moduleLldI2cMultiplexer, PCA9544A_LLD_CH0, ((ut_vcnl4020data_t*)moduleUtAlldVcnl4020.data)->timeout);
@@ -769,7 +743,6 @@ static int _utShellCmdCb_AlldVcnl4020(BaseSequentialStream* stream, int argc, ch
       default:
         break;
     }
-    aosIntDisable(&moduleIntDriver, MODULE_GPIO_INT_IRINT);
     return AOS_OK;
   }
   // print help
@@ -789,7 +762,7 @@ static ut_vcnl4020data_t _utVcnl4020Data = {
   /* driver       */ &moduleLldProximity,
   /* timeout      */ MICROSECONDS_PER_SECOND,
   /* event source */ &aos.events.io,
-  /* event flags  */ (1 << MODULE_GPIO_INT_IRINT),
+  /* event flags  */ MODULE_OS_IOEVENTFLAGS_IRINT,
 };
 aos_unittest_t moduleUtAlldVcnl4020 = {
   /* name           */ "VCNL4020",

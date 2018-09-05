@@ -35,7 +35,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*===========================================================================*/
 #include <hal.h>
-#include <aos_interrupts.h>
 
 /**
  * @brief   CAN driver to use.
@@ -46,17 +45,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @brief   Configuration for the CAN driver.
  */
 extern CANConfig moduleHalCanConfig;
-
-/**
- * @brief   Interrupt driver (PAL).
- */
-
-extern aos_interrupt_driver_t moduleIntDriver;
-
-/**
- * @brief   Interrupt driver config.
- */
-extern aos_interrupt_cfg_t moduleIntConfig[6];
 
 /**
  * @brief   I2C driver to access the EEPROM.
@@ -104,79 +92,49 @@ extern SPIConfig moduleHalSpiLightConfig;
 #include <amiro-lld.h>
 
 /**
- * @brief   Interrupt channel for the SYS_SYNC signal.
- */
-#define MODULE_GPIO_INT_SYSSYNC          ((uint8_t)1)
-
-/**
- * @brief   Interrupt channel for the LASER_OC signal.
- */
-#define MODULE_GPIO_INT_LASEROC          ((uint8_t)2)
-
-/**
- * @brief   Interrupt channel for the SYS_UART_DN signal.
- */
-#define MODULE_GPIO_INT_SYSUARTDN        ((uint8_t)3)
-
-/**
- * @brief   Interrupt channel for the WL_GDO2 signal.
- */
-#define MODULE_GPIO_INT_WLGDO2           ((uint8_t)4)
-
-/**
- * @brief   Interrupt channel for the WL_GDO0 signal.
- */
-#define MODULE_GPIO_INT_WLGDO0           ((uint8_t)5)
-
-/**
- * @brief   Interrupt channel for the SYS_PD signal.
- */
-#define MODULE_GPIO_INT_SYSPD            ((uint8_t)6)
-
-/**
  * @brief   LIGHT_BANK output signal GPIO.
  */
-extern apalGpio_t moduleGpioLightBlank;
+extern apalControlGpio_t moduleGpioLightBlank;
 
 /**
  * @brief   LASER_EN output signal GPIO.
  */
-extern apalGpio_t moduleGpioLaserEn;
+extern apalControlGpio_t moduleGpioLaserEn;
 
 /**
  * @brief   LASER_OC input signal GPIO.
  */
-extern apalGpio_t moduleGpioLaserOc;
+extern apalControlGpio_t moduleGpioLaserOc;
 
 /**
  * @brief   SYS_UART_DN bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysUartDn;
+extern apalControlGpio_t moduleGpioSysUartDn;
 
 /**
  * @brief   WL_GDO2 input signal GPIO.
  */
-extern apalGpio_t moduleGpioWlGdo2;
+extern apalControlGpio_t moduleGpioWlGdo2;
 
 /**
  * @brief   WL_GDO0 input signal GPIO.
  */
-extern apalGpio_t moduleGpioWlGdo0;
+extern apalControlGpio_t moduleGpioWlGdo0;
 
 /**
  * @brief   LIGHT_XLAT output signal GPIO.
  */
-extern apalGpio_t moduleGpioLightXlat;
+extern apalControlGpio_t moduleGpioLightXlat;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysPd;
+extern apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_SYNC bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysSync;
+extern apalControlGpio_t moduleGpioSysSync;
 
 /** @} */
 
@@ -190,32 +148,32 @@ extern apalGpio_t moduleGpioSysSync;
 /**
  * @brief   Event flag to be set on a LASER_OC interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_LASEROC          ((eventflags_t)(1 << MODULE_GPIO_INT_LASEROC))
+#define MODULE_OS_IOEVENTFLAGS_LASEROC          ((eventflags_t)1 << GPIOB_LASER_OC_N)
 
 /**
  * @brief   Event flag to be set on a SYS_UART_DN interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSUARTDN        ((eventflags_t)(1 << MODULE_GPIO_INT_SYSUARTDN))
+#define MODULE_OS_IOEVENTFLAGS_SYSUARTDN        ((eventflags_t)1 << GPIOB_SYS_UART_DN)
 
 /**
  * @brief   Event flag to be set on a WL_GDO2 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_WLGDO2           ((eventflags_t)(1 << MODULE_GPIO_INT_WLGDO2))
+#define MODULE_OS_IOEVENTFLAGS_WLGDO2           ((eventflags_t)1 << GPIOB_WL_GDO2)
 
 /**
  * @brief   Event flag to be set on a WL_GDO0 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_WLGDO0           ((eventflags_t)(1 << MODULE_GPIO_INT_WLGDO0))
+#define MODULE_OS_IOEVENTFLAGS_WLGDO0           ((eventflags_t)1 << GPIOB_WL_GDO0)
 
 /**
  * @brief   Event flag to be set on a SYS_PD interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)(1 << MODULE_GPIO_INT_SYSPD))
+#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)1 << GPIOC_SYS_PD_N)
 
 /**
  * @brief   Event flag to be set on a SYS_SYNC interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)(1 << MODULE_GPIO_INT_SYSSYNC))
+#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)1 << GPIOD_SYS_INT_N)
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
 /**
@@ -223,6 +181,22 @@ extern apalGpio_t moduleGpioSysSync;
  */
 extern const char* moduleShellPrompt;
 #endif
+
+/**
+ * @brief   Interrupt initialization macro.
+ * @note    SSSP related interrupt signals are already initialized in 'aos_system.c'.
+ */
+#define MODULE_INIT_INTERRUPTS() {                                            \
+  /* LASER_OC */                                                              \
+  palSetPadCallback(moduleGpioLaserOc.gpio->port, moduleGpioLaserOc.gpio->pad, _intCallback, &moduleGpioLaserOc.gpio->pad); \
+  palEnablePadEvent(moduleGpioLaserOc.gpio->port, moduleGpioLaserOc.gpio->pad, APAL2CH_EDGE(moduleGpioLaserOc.meta.edge));  \
+  /* WL_GDO2 */                                                               \
+  palSetPadCallback(moduleGpioWlGdo2.gpio->port, moduleGpioWlGdo2.gpio->pad, _intCallback, &moduleGpioWlGdo2.gpio->pad);  \
+  palEnablePadEvent(moduleGpioWlGdo2.gpio->port, moduleGpioWlGdo2.gpio->pad, APAL2CH_EDGE(moduleGpioWlGdo2.meta.edge));   \
+  /* WL_GDO0 */                                                               \
+  palSetPadCallback(moduleGpioWlGdo0.gpio->port, moduleGpioWlGdo0.gpio->pad, _intCallback, &moduleGpioWlGdo0.gpio->pad);  \
+  /*palEnablePadEvent(moduleGpioWlGdo0.gpio->port, moduleGpioWlGdo0.gpio->pad, APAL2CH_EDGE(moduleGpioWlGdo0.meta.edge)); // this is broken for some reason*/   \
+}
 
 /**
  * @brief   Unit test initialization hook.
@@ -271,17 +245,17 @@ extern const char* moduleShellPrompt;
 /**
  * @brief   PD signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioPd;
+#define moduleSsspGpioPd                        moduleGpioSysPd
 
 /**
  * @brief   SYNC signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioSync;
+#define moduleSsspGpioSync                      moduleGpioSysSync
 
 /**
  * @brief   DN signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioDn;
+#define moduleSsspGpioDn                        moduleGpioSysUartDn
 
 /**
  * @brief   Event flags for PD signal events.

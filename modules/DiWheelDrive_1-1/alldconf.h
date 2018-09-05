@@ -27,6 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define AMIRO_LLD_CFG_VERSION_MINOR         0
 
 /**
+ * @brief   Width of the apalTime_t data type.
+ *
+ * @details Possible values are 8, 16, 32, and 64 bits.
+ *          By definition time is represented ot a microsecond precision.
+ */
+#define AMIROLLD_CFG_TIME_SIZE          32
+
+/**
  * @brief   Enable flag for the A3906 motor driver.
  */
 #define AMIROLLD_CFG_USE_A3906

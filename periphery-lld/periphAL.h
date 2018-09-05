@@ -56,12 +56,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 static inline void usleep(apalTime_t us)
 {
   // check if the specified time can be represented by the system
-  aosDbgCheck(us <= TIME_I2US(TIME_INFINITE));
+  aosDbgCheck(us <= chTimeI2US(TIME_INFINITE));
 
-  const systime_t st = TIME_US2I(us);
+  const sysinterval_t si = chTimeUS2I(us);
   // TIME_IMMEDIATE makes no sense and would even cause system halt
-  if (st != TIME_IMMEDIATE) {
-    chThdSleep(st);
+  if (si != TIME_IMMEDIATE) {
+    chThdSleep(si);
   }
   return;
 }
@@ -76,18 +76,8 @@ static inline void usleep(apalTime_t us)
  * @brief GPIO driver type.
  */
 struct apalGpio_t {
-  /*
-   * Workaround, since GPIOv2 (STM32F4XX) uses a different type than GPIOv1 (STM32F1XX).
-   */
-  #if defined(STM32F4XX)
-  stm32_gpio_t* port;
-  #elif defined(STM32F1XX)
-  GPIO_TypeDef* port;
-  #else
-  void* port;
-  #endif
-
-  uint8_t pad;
+  ioportid_t port;
+  iopadid_t pad;
 } PACKED_VAR;
 
 /**
@@ -183,16 +173,12 @@ static inline apalExitStatus_t apalControlGpioSet(const apalControlGpio_t* const
   return APAL_STATUS_OK;
 }
 
-#endif
-
-#if HAL_USE_PAL || defined(__DOXYGEN__)
-
 /**
- * @brief   Converts an apalGpioEdge_t to an ChibiOS EXT edge.
+ * @brief   Converts an apalGpioEdge_t to an ChibiOS PAL edge.
  */
-#define APAL2CH_EDGE(edge)                                        \
-  ((edge == APAL_GPIO_EDGE_RISING) ? PAL_EVENT_MODE_RISING_EDGE :    \
-    (edge == APAL_GPIO_EDGE_FALLING) ? PAL_EVENT_MODE_FALLING_EDGE : \
+#define APAL2CH_EDGE(edge)                                            \
+  ((edge == APAL_GPIO_EDGE_RISING) ? PAL_EVENT_MODE_RISING_EDGE :     \
+    (edge == APAL_GPIO_EDGE_FALLING) ? PAL_EVENT_MODE_FALLING_EDGE :  \
      (edge == APAL_GPIO_EDGE_BOTH) ? PAL_EVENT_MODE_BOTH_EDGES : 0)
 
 #endif
@@ -360,6 +346,8 @@ static inline apalExitStatus_t apalI2CMasterTransmit(apalI2CDriver_t* i2cd, cons
   i2cAcquireBus(i2cd);
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #if defined(STM32F1XX_I2C)
   // Due to a hardware limitation, for STM32F1 platform the minimum number of bytes that can be received is two.
   msg_t status = MSG_OK;
@@ -373,6 +361,7 @@ static inline apalExitStatus_t apalI2CMasterTransmit(apalI2CDriver_t* i2cd, cons
 #else
   const msg_t status = i2cMasterTransmitTimeout(i2cd, addr, txbuf, txbytes, rxbuf, rxbytes, ((timeout >= TIME_INFINITE) ? TIME_INFINITE : TIME_US2I(timeout)) );
 #endif
+#pragma GCC diagnostic pop
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
   i2cReleaseBus(i2cd);
@@ -413,6 +402,8 @@ static inline apalExitStatus_t apalI2CMasterReceive(apalI2CDriver_t* i2cd, const
   i2cAcquireBus(i2cd);
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #if defined(STM32F1XX_I2C)
   // Due to a hardware limitation, for STM32F1 platform the minimum number of bytes that can be received is two.
   msg_t status = MSG_OK;
@@ -426,6 +417,7 @@ static inline apalExitStatus_t apalI2CMasterReceive(apalI2CDriver_t* i2cd, const
 #else
   const msg_t status = i2cMasterReceiveTimeout(i2cd, addr, rxbuf, rxbytes, ((timeout >= TIME_INFINITE) ? TIME_INFINITE : TIME_US2I(timeout)) );
 #endif
+#pragma GCC diagnostic pop
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
   i2cReleaseBus(i2cd);

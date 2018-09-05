@@ -62,7 +62,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*===========================================================================*/
 #include <hal.h>
-#include <aos_interrupts.h>
 
 /**
  * @brief   ADC driver for reading the system voltage.
@@ -83,17 +82,6 @@ extern ADCConversionGroup moduleHalAdcVsysConversionGroup;
  * @brief   Configuration for the CAN driver.
  */
 extern CANConfig moduleHalCanConfig;
-
-/**
- * @brief   Interrupt driver (PAL).
- */
-
-extern aos_interrupt_driver_t moduleIntDriver;
-
-/**
- * @brief   Interrupt driver config.
- */
-extern aos_interrupt_cfg_t moduleIntConfig[14];
 
 /**
  * @brief   I2C driver to access multiplexer, proximity sensors 1 to 4, power monitors for VIO1.8 and VIO 3.3, and fuel gauge (rear battery).
@@ -156,194 +144,124 @@ extern SerialConfig moduleHalProgIfConfig;
 #include <amiro-lld.h>
 
 /**
- * @brief   Interrupt channel for the IR_INT1 and CHARGE_STAT1A signals.
- */
-#define MODULE_GPIO_INT_IRINT1           ((uint8_t)1)
-
-/**
- * @brief   Interrupt channel for the GAUGE_BATLOW1 signal.
- */
-#define MODULE_GPIO_INT_GAUGEBATLOW1     ((uint8_t)2)
-
-/**
- * @brief   Interrupt channel for the GAUGE_BATGD1 signal.
- */
-#define MODULE_GPIO_INT_GAUGEBATGD1      ((uint8_t)3)
-
-/**
- * @brief   Interrupt channel for the SYS_UART_DN signal.
- */
-#define MODULE_GPIO_INT_SYSUARTDN        ((uint8_t)4)
-
-/**
- * @brief   Interrupt channel for the IR_INT2 and CHARGE_STAT2A signals.
- */
-#define MODULE_GPIO_INT_IRINT2           ((uint8_t)5)
-
-/**
- * @brief   Interrupt channel for the TOUCH_INT signal.
- */
-#define MODULE_GPIO_INT_TOUCHINT         ((uint8_t)6)
-
-/**
- * @brief   Interrupt channel for the GAUGE_BATLOW2 signal.
- */
-#define MODULE_GPIO_INT_GAUGEBATLOW2     ((uint8_t)7)
-
-/**
- * @brief   Interrupt channel for the GAUGE_BATGD2 signal.
- */
-#define MODULE_GPIO_INT_GAUGEBATGD2      ((uint8_t)8)
-
-/**
- * @brief   Interrupt channel for the PATH_DC signal.
- */
-#define MODULE_GPIO_INT_PATHDC           ((uint8_t)9)
-
-/**
- * @brief   Interrupt channel for the SYS_SPI_DIR signal.
- */
-#define MODULE_GPIO_INT_SYSSPIDIR        ((uint8_t)10)
-
-/**
- * @brief   Interrupt channel for the SYS_SYNC signal.
- */
-#define MODULE_GPIO_INT_SYSSYNC          ((uint8_t)11)
-
-/**
- * @brief   Interrupt channel for the SYS_PD signal.
- */
-#define MODULE_GPIO_INT_SYSPD            ((uint8_t)12)
-
-/**
- * @brief   Interrupt channel for the SYS_WARMRST signal.
- */
-#define MODULE_GPIO_INT_SYSWARMRST       ((uint8_t)13)
-
-/**
- * @brief   Interrupt channel for the SYS_UART_UP signal.
- */
-#define MODULE_GPIO_INT_SYSUARTUP        ((uint8_t)14)
-
-/**
  * @brief   SYS_REG_EN output signal GPIO.
  */
-extern apalGpio_t moduleGpioSysRegEn;
+extern apalControlGpio_t moduleGpioSysRegEn;
 
 /**
  * @brief   IR_INT1 input signal GPIO.
  */
-extern apalGpio_t moduleGpioIrInt1;
+extern apalControlGpio_t moduleGpioIrInt1;
 
 /**
  * @brief   POWER_EN output signal GPIO.
  */
-extern apalGpio_t moduleGpioPowerEn;
+extern apalControlGpio_t moduleGpioPowerEn;
 
 /**
  * @brief   SYS_UART_DN bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysUartDn;
+extern apalControlGpio_t moduleGpioSysUartDn;
 
 /**
  * @brief   CHARGE_STAT2A input signal GPIO.
  */
-extern apalGpio_t moduleGpioChargeStat2A;
+extern apalControlGpio_t moduleGpioChargeStat2A;
 
 /**
  * @brief   GAUGE_BATLOW2 input signal GPIO.
  */
-extern apalGpio_t moduleGpioGaugeBatLow2;
+extern apalControlGpio_t moduleGpioGaugeBatLow2;
 
 /**
  * @brief   GAUGE_BATGD2 input signal GPIO.
  */
-extern apalGpio_t moduleGpioGaugeBatGd2;
+extern apalControlGpio_t moduleGpioGaugeBatGd2;
 
 /**
  * @brief   LED output signal GPIO.
  */
-extern apalGpio_t moduleGpioLed;
+extern apalControlGpio_t moduleGpioLed;
 
 /**
  * @brief   SYS_UART_UP bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysUartUp;
+extern apalControlGpio_t moduleGpioSysUartUp;
 
 /**
  * @brief   CHARGE_STAT1A input signal GPIO.
  */
-extern apalGpio_t moduleGpioChargeStat1A;
+extern apalControlGpio_t moduleGpioChargeStat1A;
 
 /**
  * @brief   GAUGE_BATLOW1 input signal GPIO.
  */
-extern apalGpio_t moduleGpioGaugeBatLow1;
+extern apalControlGpio_t moduleGpioGaugeBatLow1;
 
 /**
  * @brief   GAUGE_BATGD1 input signal GPIO.
  */
-extern apalGpio_t moduleGpioGaugeBatGd1;
+extern apalControlGpio_t moduleGpioGaugeBatGd1;
 
 /**
  * @brief   CHARG_EN1 output signal GPIO.
  */
-extern apalGpio_t moduleGpioChargeEn1;
+extern apalControlGpio_t moduleGpioChargeEn1;
 
 /**
  * @brief   IR_INT2 input signal GPIO.
  */
-extern apalGpio_t moduleGpioIrInt2;
+extern apalControlGpio_t moduleGpioIrInt2;
 
 /**
  * @brief   TOUCH_INT input signal GPIO.
  */
-extern apalGpio_t moduleGpioTouchInt;
+extern apalControlGpio_t moduleGpioTouchInt;
 
 /**
  * @brief   SYS_DONE input signal GPIO.
  */
-extern apalGpio_t moduleGpioSysDone;
+extern apalControlGpio_t moduleGpioSysDone;
 
 /**
  * @brief   SYS_PROG output signal GPIO.
  */
-extern apalGpio_t moduleGpioSysProg;
+extern apalControlGpio_t moduleGpioSysProg;
 
 /**
  * @brief   PATH_DC input signal GPIO.
  */
-extern apalGpio_t moduleGpioPathDc;
+extern apalControlGpio_t moduleGpioPathDc;
 
 /**
  * @brief   SYS_SPI_DIR bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysSpiDir;
+extern apalControlGpio_t moduleGpioSysSpiDir;
 
 /**
  * @brief   SYS_SYNC bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysSync;
+extern apalControlGpio_t moduleGpioSysSync;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysPd;
+extern apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_WARMRST bidirectional signal GPIO.
  */
-extern apalGpio_t moduleGpioSysWarmrst;
+extern apalControlGpio_t moduleGpioSysWarmrst;
 
 /**
  * @brief   BT_RST output signal GPIO.
  */
-extern apalGpio_t moduleGpioBtRst;
+extern apalControlGpio_t moduleGpioBtRst;
 
 /**
  * @brief   CHARGE_EN2 output signal GPIO.
  */
-extern apalGpio_t moduleGpioChargeEn2;
+extern apalControlGpio_t moduleGpioChargeEn2;
 
 /** @} */
 
@@ -357,72 +275,72 @@ extern apalGpio_t moduleGpioChargeEn2;
 /**
  * @brief   Event flag to be set on a IR_INT1 / CHARGE_STAT1A interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_IRINT1           ((eventflags_t)1 << MODULE_GPIO_INT_IRINT1)
+#define MODULE_OS_IOEVENTFLAGS_IRINT1           ((eventflags_t)1 << GPIOB_IR_INT1_N)
 
 /**
  * @brief   Event flag to be set on a GAUGE_BATLOW1 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_GAUGEBATLOW1     ((eventflags_t)1 << MODULE_GPIO_INT_GAUGEBATLOW1)
+#define MODULE_OS_IOEVENTFLAGS_GAUGEBATLOW1     ((eventflags_t)1 << GPIOC_GAUGE_BATLOW1)
 
 /**
  * @brief   Event flag to be set on a GAUGE_BATGD1 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_GAUGEBATGD1      ((eventflags_t)1 << MODULE_GPIO_INT_GAUGEBATGD1)
+#define MODULE_OS_IOEVENTFLAGS_GAUGEBATGD1      ((eventflags_t)1 << GPIOC_GAUGE_BATGD1_N)
 
 /**
  * @brief   Event flag to be set on a SYS_UART_DN interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSUARTDN        ((eventflags_t)1 << MODULE_GPIO_INT_SYSUARTDN)
+#define MODULE_OS_IOEVENTFLAGS_SYSUARTDN        ((eventflags_t)1 << GPIOB_SYS_UART_DN)
 
 /**
  * @brief   Event flag to be set on a IR_INT2 / CHARGE_STAT2A interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_IRINT2           ((eventflags_t)1 << MODULE_GPIO_INT_IRINT2)
+#define MODULE_OS_IOEVENTFLAGS_IRINT2           ((eventflags_t)1 << GPIOC_IR_INT2_N)
 
 /**
  * @brief   Event flag to be set on a TOUCH_INT interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_TOUCHINT         ((eventflags_t)1 << MODULE_GPIO_INT_TOUCHINT)
+#define MODULE_OS_IOEVENTFLAGS_TOUCHINT         ((eventflags_t)1 << GPIOC_TOUCH_INT_N)
 
 /**
  * @brief   Event flag to be set on a GAUGE_BATLOW2 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_GAUGEBATLOW2     ((eventflags_t)1 << MODULE_GPIO_INT_GAUGEBATLOW2)
+#define MODULE_OS_IOEVENTFLAGS_GAUGEBATLOW2     ((eventflags_t)1 << GPIOB_GAUGE_BATLOW2)
 
 /**
  * @brief   Event flag to be set on a GAUGE_BATGD2 interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_GAUGEBATGD2      ((eventflags_t)1 << MODULE_GPIO_INT_GAUGEBATGD2)
+#define MODULE_OS_IOEVENTFLAGS_GAUGEBATGD2      ((eventflags_t)1 << GPIOB_GAUGE_BATGD2_N)
 
 /**
  * @brief   Event flag to be set on a PATH_DC interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_PATHDC           ((eventflags_t)1 << MODULE_GPIO_INT_PATHDC)
+#define MODULE_OS_IOEVENTFLAGS_PATHDC           ((eventflags_t)1 << GPIOC_PATH_DC)
 
 /**
  * @brief   Event flag to be set on a SYS_SPI_DIR interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSSPIDIR        ((eventflags_t)1 << MODULE_GPIO_INT_SYSSPIDIR)
+#define MODULE_OS_IOEVENTFLAGS_SYSSPIDIR        ((eventflags_t)1 << GPIOC_SYS_SPI_DIR)
 
 /**
  * @brief   Event flag to be set on a SYS_SYNC interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)1 << MODULE_GPIO_INT_SYSSYNC)
+#define MODULE_OS_IOEVENTFLAGS_SYSSYNC          ((eventflags_t)1 << GPIOC_SYS_INT_N)
 
 /**
  * @brief   Event flag to be set on a SYS_PD interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)1 << MODULE_GPIO_INT_SYSPD)
+#define MODULE_OS_IOEVENTFLAGS_SYSPD            ((eventflags_t)1 << GPIOC_SYS_PD_N)
 
 /**
  * @brief   Event flag to be set on a SYS_WARMRST interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSWARMRST       ((eventflags_t)1 << MODULE_GPIO_INT_SYSWARMRST)
+#define MODULE_OS_IOEVENTFLAGS_SYSWARMRST       ((eventflags_t)1 << GPIOC_SYS_WARMRST_N)
 
 /**
  * @brief   Event flag to be set on a SYS_UART_UP interrupt.
  */
-#define MODULE_OS_IOEVENTFLAGS_SYSUARTUP        ((eventflags_t)1 << MODULE_GPIO_INT_SYSUARTUP)
+#define MODULE_OS_IOEVENTFLAGS_SYSUARTUP        ((eventflags_t)1 << GPIOB_SYS_UART_UP)
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
 /**
@@ -430,6 +348,43 @@ extern apalGpio_t moduleGpioChargeEn2;
  */
 extern const char* moduleShellPrompt;
 #endif
+
+/**
+ * @brief   Interrupt initialization macro.
+ * @note    SSSP related interrupt signals are already initialized in 'aos_system.c'.
+ */
+#define MODULE_INIT_INTERRUPTS() {                                            \
+  /* IR_INT1 */                                                               \
+  palSetPadCallback(moduleGpioIrInt1.gpio->port, moduleGpioIrInt1.gpio->pad, _intCallback, &moduleGpioIrInt1.gpio->pad); \
+  palEnablePadEvent(moduleGpioIrInt1.gpio->port, moduleGpioIrInt1.gpio->pad, APAL2CH_EDGE(moduleGpioIrInt1.meta.edge));  \
+  /* GAUGE_BATLOW2 */                                                         \
+  palSetPadCallback(moduleGpioGaugeBatLow2.gpio->port, moduleGpioGaugeBatLow2.gpio->pad, _intCallback, &moduleGpioGaugeBatLow2.gpio->pad);  \
+  palEnablePadEvent(moduleGpioGaugeBatLow2.gpio->port, moduleGpioGaugeBatLow2.gpio->pad, APAL2CH_EDGE(moduleGpioGaugeBatLow2.meta.edge));   \
+  /* GAUGE_BATGD2 */                                                          \
+  palSetPadCallback(moduleGpioGaugeBatGd2.gpio->port, moduleGpioGaugeBatGd2.gpio->pad, _intCallback, &moduleGpioGaugeBatGd2.gpio->pad); \
+  palEnablePadEvent(moduleGpioGaugeBatGd2.gpio->port, moduleGpioGaugeBatGd2.gpio->pad, APAL2CH_EDGE(moduleGpioGaugeBatGd2.meta.edge));  \
+  /* GAUGE_BATLOW1 */                                                         \
+  palSetPadCallback(moduleGpioGaugeBatLow1.gpio->port, moduleGpioGaugeBatLow1.gpio->pad, _intCallback, &moduleGpioGaugeBatLow1.gpio->pad);  \
+  palEnablePadEvent(moduleGpioGaugeBatLow1.gpio->port, moduleGpioGaugeBatLow1.gpio->pad, APAL2CH_EDGE(moduleGpioGaugeBatLow1.meta.edge));   \
+  /* GAUGE_BATGD1 */                                                          \
+  palSetPadCallback(moduleGpioGaugeBatGd1.gpio->port, moduleGpioGaugeBatGd1.gpio->pad, _intCallback, &moduleGpioGaugeBatGd1.gpio->pad); \
+  palEnablePadEvent(moduleGpioGaugeBatGd1.gpio->port, moduleGpioGaugeBatGd1.gpio->pad, APAL2CH_EDGE(moduleGpioGaugeBatGd1.meta.edge));  \
+  /* IR_INT1 */                                                               \
+  palSetPadCallback(moduleGpioIrInt2.gpio->port, moduleGpioIrInt2.gpio->pad, _intCallback, &moduleGpioIrInt1.gpio->pad); \
+  palEnablePadEvent(moduleGpioIrInt2.gpio->port, moduleGpioIrInt2.gpio->pad, APAL2CH_EDGE(moduleGpioIrInt1.meta.edge));  \
+  /* TOUCH_INT */                                                             \
+  palSetPadCallback(moduleGpioTouchInt.gpio->port, moduleGpioTouchInt.gpio->pad, _intCallback, &moduleGpioTouchInt.gpio->pad); \
+  palEnablePadEvent(moduleGpioTouchInt.gpio->port, moduleGpioTouchInt.gpio->pad, APAL2CH_EDGE(moduleGpioTouchInt.meta.edge));  \
+  /* PATH_DC */                                                               \
+  palSetPadCallback(moduleGpioPathDc.gpio->port, moduleGpioPathDc.gpio->pad, _intCallback, &moduleGpioPathDc.gpio->pad);  \
+  palEnablePadEvent(moduleGpioPathDc.gpio->port, moduleGpioPathDc.gpio->pad, APAL2CH_EDGE(moduleGpioPathDc.meta.edge));   \
+  /* SYS_SPI_DIR */                                                           \
+  palSetPadCallback(moduleGpioSysSpiDir.gpio->port, moduleGpioSysSpiDir.gpio->pad, _intCallback, &moduleGpioSysSpiDir.gpio->pad); \
+  palEnablePadEvent(moduleGpioSysSpiDir.gpio->port, moduleGpioSysSpiDir.gpio->pad, APAL2CH_EDGE(moduleGpioSysSpiDir.meta.edge));  \
+  /* SYS_WARMRST */                                                           \
+  palSetPadCallback(moduleGpioSysWarmrst.gpio->port, moduleGpioSysWarmrst.gpio->pad, _intCallback, &moduleGpioSysWarmrst.gpio->pad);  \
+  palEnablePadEvent(moduleGpioSysWarmrst.gpio->port, moduleGpioSysWarmrst.gpio->pad, APAL2CH_EDGE(moduleGpioSysWarmrst.meta.edge));   \
+}
 
 /**
  * @brief   Unit test initialization hook.
@@ -508,22 +463,22 @@ extern const char* moduleShellPrompt;
 /**
  * @brief   PD signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioPd;
+#define moduleSsspGpioPd                        moduleGpioSysPd
 
 /**
  * @brief   SYNC signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioSync;
+#define moduleSsspGpioSync                       moduleGpioSysSync
 
 /**
  * @brief   DN signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioDn;
+#define moduleSsspGpioDn                        moduleGpioSysUartDn
 
 /**
  * @brief   UP signal GPIO.
  */
-extern apalControlGpio_t moduleSsspGpioUp;
+#define moduleSsspGpioUp                        moduleGpioSysUartUp
 
 /**
  * @brief   Event flags for PD signal events.

@@ -18,26 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "module.h"
 
+#include <amiroos.h>
+
 /*===========================================================================*/
 /**
  * @name Module specific functions
  * @{
  */
 /*===========================================================================*/
-#include <amiroos.h>
-
-/**
- * @brief   Interrupt service routine callback for I/O interrupt signals.
- *
- * @param   args      Channel on which the interrupt was encountered.
- */
-static void _modulePalIsrCallback(void *args) {
-  chSysLockFromISR();
-  chEvtBroadcastFlagsI(&aos.events.io, (1 << (*(uint16_t*)args)));
-  chSysUnlockFromISR();
-
-  return;
-}
 
 /** @} */
 
@@ -51,62 +39,6 @@ static void _modulePalIsrCallback(void *args) {
 CANConfig moduleHalCanConfig = {
   /* mcr  */ CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
   /* btr  */ CAN_BTR_SJW(1) | CAN_BTR_TS2(2) | CAN_BTR_TS1(13) | CAN_BTR_BRP(1),
-};
-
-aos_interrupt_cfg_t moduleIntConfig[6] = {
-    /* channel  1 */ { // SYS_INT_N/SYS_SYNC_N: automatic interrupt on event
-      /* port     */ GPIOD,
-      /* pad      */ GPIOD_SYS_INT_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 1,
-    },
-    /* channel  2 */ { // LASER_OC_N: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_LASER_OC_N,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 2,
-    },
-    /* channel  3 */ { // SYS_UART_DN: automatic interrupt on event
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_SYS_UART_DN,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 3,
-    },
-    /* channel  4 */ { // WL_GDO0: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_WL_GDO0,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 4,
-    },
-    /* channel  5 */ { // WL_GDO2: must be enabled explicitely
-      /* port     */ GPIOB,
-      /* pad      */ GPIOB_WL_GDO2,
-      /* flags    */ 0,
-      /* mode     */ PAL_EVENT_MODE_BOTH_EDGES,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 5,
-    },
-    /* channel  6 */ { // SYS_PD_N: automatic interrupt on event
-      /* port     */ GPIOC,
-      /* pad      */ GPIOC_SYS_PD_N,
-      /* flags    */ AOS_INTERRUPT_AUTOSTART,
-      /* mode     */ PAL_EVENT_MODE_FALLING_EDGE,
-      /* callback */ _modulePalIsrCallback,
-      /* cb arg   */ 6,
-    },
-};
-
-aos_interrupt_driver_t moduleIntDriver = {
-  /* config     */ NULL,
-  /* interrupts */ 6,
 };
 
 I2CConfig moduleHalI2cEepromConfig = {
@@ -138,49 +70,148 @@ SPIConfig moduleHalSpiLightConfig = {
  */
 /*===========================================================================*/
 
-apalGpio_t moduleGpioLightBlank = {
+/**
+ * @brief   LIGHT_BANK output signal GPIO.
+ */
+static apalGpio_t _gpioLightBlank = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_LIGHT_BLANK,
 };
+apalControlGpio_t moduleGpioLightBlank = {
+  /* GPIO */ &_gpioLightBlank,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ TLC5947_LLD_BLANK_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioLaserEn = {
+/**
+ * @brief   LASER_EN output signal GPIO.
+ */
+static apalGpio_t _gpioLaserEn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LASER_EN,
 };
+apalControlGpio_t moduleGpioLaserEn = {
+  /* GPIO */ &_gpioLaserEn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ TPS2051B_LLD_ENABLE_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioLaserOc = {
+/**
+ * @brief   LASER_OC input signal GPIO.
+ */
+static apalGpio_t _gpioLaserOc = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LASER_OC_N,
 };
+apalControlGpio_t moduleGpioLaserOc = {
+  /* GPIO */ &_gpioLaserOc,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ TPS2051B_LLD_OVERCURRENT_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysUartDn = {
+/**
+ * @brief   SYS_UART_DN bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysUartDn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_DN,
 };
+apalControlGpio_t moduleGpioSysUartDn = {
+  /* GPIO */ &_gpioSysUartDn,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioWlGdo2 = {
+/**
+ * @brief   WL_GDO2 input signal GPIO.
+ */
+static apalGpio_t _gpioWlGdo2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_WL_GDO2,
 };
+apalControlGpio_t moduleGpioWlGdo2 = {
+  /* GPIO */ &_gpioWlGdo2,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioWlGdo0= {
+/**
+ * @brief   WL_GDO0 input signal GPIO.
+ */
+static apalGpio_t _gpioWlGdo0= {
   /* port */ GPIOB,
   /* pad  */ GPIOB_WL_GDO0,
 };
+apalControlGpio_t moduleGpioWlGdo0 = {
+  /* GPIO */ &_gpioWlGdo0,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_INPUT,
+    /* active state   */ APAL_GPIO_ACTIVE_HIGH,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioLightXlat = {
+/**
+ * @brief   LIGHT_XLAT output signal GPIO.
+ */
+static apalGpio_t _gpioLightXlat = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_LIGHT_XLAT,
 };
+apalControlGpio_t moduleGpioLightXlat = {
+  /* GPIO */ &_gpioLightXlat,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
+    /* active state   */ TLC5947_LLD_XLAT_ACTIVE_STATE,
+    /* interrupt edge */ APAL_GPIO_EDGE_NONE,
+  },
+};
 
-apalGpio_t moduleGpioSysPd = {
+/**
+ * @brief   SYS_PD bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
+apalControlGpio_t moduleGpioSysPd = {
+  /* GPIO */ &_gpioSysPd,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
+};
 
-apalGpio_t moduleGpioSysSync = {
+/**
+ * @brief   SYS_SYNC bidirectional signal GPIO.
+ */
+static apalGpio_t _gpioSysSync = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_SYS_INT_N,
+};
+apalControlGpio_t moduleGpioSysSync = {
+  /* GPIO */ &_gpioSysSync,
+  /* meta */ {
+    /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
+    /* active state   */ APAL_GPIO_ACTIVE_LOW,
+    /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
+  },
 };
 
 /** @} */
@@ -205,33 +236,6 @@ const char* moduleShellPrompt = "LightRing";
  */
 /*===========================================================================*/
 
-apalControlGpio_t moduleSsspGpioPd = {
-  /* GPIO */ &moduleGpioSysPd,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioSync = {
-  /* GPIO */ &moduleGpioSysSync,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
-apalControlGpio_t moduleSsspGpioDn = {
-  /* GPIO */ &moduleGpioSysUartDn,
-  /* meta */ {
-    /* active state */ APAL_GPIO_ACTIVE_LOW,
-    /* edge         */ APAL_GPIO_EDGE_FALLING,
-    /* direction    */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
-  },
-};
-
 /** @} */
 
 /*===========================================================================*/
@@ -248,41 +252,13 @@ AT24C01BNDriver moduleLldEeprom = {
 
 TLC5947Driver moduleLldLedPwm = {
   /* SPI driver         */ &MODULE_HAL_SPI_LIGHT,
-  /* BLANK signal GPIO  */ {
-    /* GPIO */ &moduleGpioLightBlank,
-    /* meta */ {
-      /* active state */ TLC5947_LLD_BLANK_ACTIVE_STATE,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
-  /* XLAT signal GPIO   */ {
-    /* GPIO */ &moduleGpioLightXlat,
-    /* meta */ {
-      /* active state */ TLC5947_LLD_XLAT_ACTIVE_STATE,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
+  /* BLANK signal GPIO  */ &moduleGpioLightBlank,
+  /* XLAT signal GPIO   */ &moduleGpioLightXlat,
 };
 
 TPS2051BDriver moduleLldPowerSwitchLaser = {
-  /* laser enable gpio */ {
-    /* GPIO */ &moduleGpioLaserEn,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_HIGH,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_OUTPUT,
-    },
-  },
-  /* laser overcurrent gpio */ {
-    /* GPIO         */ &moduleGpioLaserOc,
-    /* meta */ {
-      /* active state */ APAL_GPIO_ACTIVE_LOW,
-      /* edge         */ APAL_GPIO_EDGE_NONE,
-      /* direction    */ APAL_GPIO_DIRECTION_INPUT,
-    },
-  },
+  /* laser enable GPIO      */ &moduleGpioLaserEn,
+  /* laser overcurrent GPIO */ &moduleGpioLaserOc,
 };
 
 /** @} */
