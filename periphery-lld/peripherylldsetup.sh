@@ -334,14 +334,14 @@ function initAmiroLld {
   local peripheryllddir=$(dirname $(realpath ${BASH_SOURCE[0]}))
   local amirollddir=${peripheryllddir}/AMiRo-LLD
 
-  # if the AMiRo-BLT folder is not empty
+  # if the AMiRo-LLD folder is not empty
   if [ ! -z "$(ls -A $amirollddir)" ]; then
     printWarning "$(realpath $amirollddir) is not empty. Delete and reinitialize? [y/n]\n"
     local userinput=""
     readUserInput "YyNn" userinput
     case $userinput in
       Y|y)
-        wipeAmiroBlt
+        wipeAmiroLld
         ;;
       N|n)
         printWarning "AMiRo-LLD initialization aborted by user\n"
