@@ -123,7 +123,7 @@ static size_t _channelreadt(void *instance, uint8_t *bp, size_t n, sysinterval_t
 static msg_t _channelctl(void *instance, unsigned int operation, void *arg)
 {
   if (((AosIOChannel*)instance)->flags & AOS_IOCHANNEL_OUTPUT_ENABLE) {
-    return chnControl(((AosIOChannel*)instance)->asyncchannel, operation, arg));
+    return chnControl(((AosIOChannel*)instance)->asyncchannel, operation, arg);
   } else {
     return MSG_OK;
   }
