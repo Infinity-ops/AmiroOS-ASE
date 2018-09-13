@@ -17,11 +17,11 @@
  */
 
 /**
- * @file    os/modules/DiWheelDrive/chconf.h
- * @brief   ChibiOS Configuration file for the DiWheelDrive v1.1 module.
+ * @file    
+ * @brief   ChibiOS Configuration file for the PowerManagement v1.1 module.
  * @details Contains the application specific kernel settings.
  *
- * @addtogroup config
+ * @addtogroup powermanagement_ch_config
  * @details Kernel related settings and hooks.
  * @{
  */

@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_thread.c
+ * @brief   Thread code.
+ *
+ * @addtogroup aos_threads
+ * @{
+ */
+
 #include <aos_thread.h>
 
 /**
@@ -48,3 +56,5 @@ void aosThdSleepUntilS(const aos_timestamp_t* t)
 
   return;
 }
+
+/** @} */

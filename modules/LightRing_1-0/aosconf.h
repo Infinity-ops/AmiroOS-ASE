@@ -16,6 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   AMiRo-OS Configuration file for the LightRing v1.0 module.
+ * @details Contains the application specific AMiRo-OS settings.
+ *
+ * @addtogroup lightring_aos_config
+ * @{
+ */
+
 #ifndef _AOSCONF_H_
 #define _AOSCONF_H_
 
@@ -212,3 +221,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #endif /* _AOSCONF_H_ */
 
+/** @} */

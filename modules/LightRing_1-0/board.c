@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   LightRing v1.0 Board specific initializations.
+ *
+ * @addtogroup lightring_board
+ * @{
+ */
+
 #include <hal.h>
 
 #if HAL_USE_PAL || defined(__DOXYGEN__)
@@ -71,3 +79,5 @@ void boardInit(void) {
   AFIO->MAPR = AFIO_MAPR_SWJ_CFG_JTAGDISABLE |
                AFIO_MAPR_USART3_REMAP_PARTIALREMAP;
 }
+
+/** @} */

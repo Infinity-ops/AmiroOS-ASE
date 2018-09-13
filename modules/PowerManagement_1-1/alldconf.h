@@ -16,6 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   AMiRo-LLD Configuration file for the PowerManagement v1.1 module.
+ * @details Contains the application specific AMiRo-LLD settings.
+ *
+ * @addtogroup powermanagement_lld_config
+ * @{
+ */
+
 #ifndef _ALLDCONF_H_
 #define _ALLDCONF_H_
 
@@ -90,3 +99,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define AMIROLLD_CFG_USE_VCNL4020
 
 #endif /* _ALLDCONF_H_ */
+
+/** @} */

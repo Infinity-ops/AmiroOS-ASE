@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_debug.h
+ * @brief   Macros used for debugging.
+ *
+ * @addtogroup aos_debug
+ * @{
+ */
+
 #ifndef _AMIROOS_DEBUG_H_
 #define _AMIROOS_DEBUG_H_
 
@@ -91,3 +99,5 @@ extern "C" {
 #endif
 
 #endif /* _AMIROOS_DEBUG_H_ */
+
+/** @} */

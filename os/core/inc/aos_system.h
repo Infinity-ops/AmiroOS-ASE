@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_system.h
+ * @brief   System macros and structures.
+ *
+ * @addtogroup aos_system
+ * @{
+ */
+
 #ifndef _AMIROOS_SYSTEM_H_
 #define _AMIROOS_SYSTEM_H_
 
@@ -212,3 +220,5 @@ static inline void aosSysGetUptime(aos_timestamp_t* ut)
 }
 
 #endif /* _AMIROOS_SYSTEM_H_ */
+
+/** @} */

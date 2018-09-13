@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_iostream.h
+ * @brief   Stream and channel macros and structures.
+ *
+ * @addtogroup aos_stream
+ * @{
+ */
+
 #ifndef _AMIROOS_IOSTREAM_H_
 #define _AMIROOS_IOSTREAM_H_
 
@@ -134,3 +142,5 @@ extern "C" {
 #endif
 
 #endif /* _AMIROOS_IOSTREAM_H_ */
+
+/** @} */

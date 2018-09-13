@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   Structures and constant for the PowerManagement module.
+ *
+ * @addtogroup powermanagement_module
+ * @{
+ */
+
 #include "module.h"
 
 #include <amiroos.h>
@@ -1208,4 +1216,5 @@ aos_unittest_t moduleUtAlldVcnl4020 = {
 
 #endif /* AMIROOS_CFG_TESTS_ENABLE == true */
 
+/** @} */
 /** @} */

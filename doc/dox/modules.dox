@@ -17,28 +17,51 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    aos_types.h
- * @brief   Data types used throughout AMiRo-OS
- *
- * @addtogroup aos_types
- * @{
+ * @defgroup modules Modules
+ * @ingroup amiroos
  */
-
-#ifndef _AMIROOS_TYPES_H_
-#define _AMIROOS_TYPES_H_
 
 /**
- * @brief   Error codes used in AMiRo-OS.
+ * @defgroup diwheeldrive DiWheelDrive
+ * @ingroup modules
  */
-typedef enum {
-  AOS_OK = 0,                 /**< No error, success. */
-  AOS_SUCCESS = 0,            /**< No error, success */
-  AOS_WARNING = 1,            /**< No error, but a warning occurred */
-  AOS_INVALID_ARGUMENTS = 2,  /**< No error, but given arguments are invalid */
-  AOS_ERROR = 0x80,           /**< An error occurred */
-  AOS_FAILURE = 0x80,         /**< An error occurred */
-} aos_status_t;
 
-#endif /* _AMIROOS_TYPES_H_ */
+/**
+ * @defgroup diwheeldrive_module Module
+ * @ingroup diwheeldrive
+ */
 
-/** @} */
+/**
+ * @defgroup diwheeldrive_board Board
+ * @ingroup diwheeldrive
+ */
+
+/**
+ * @defgroup powermanagement PowerManagement
+ * @ingroup modules
+ */
+
+/**
+ * @defgroup powermanagement_module Module
+ * @ingroup powermanagement
+ */
+
+/**
+ * @defgroup powermanagement_board Board
+ * @ingroup powermanagement
+ */
+
+/**
+ * @defgroup lightring LightRing
+ * @ingroup modules
+ */
+
+/**
+ * @defgroup lightring_module Module
+ * @ingroup lightring
+ */
+
+/**
+ * @defgroup lightring_board Board
+ * @ingroup lightring
+ */

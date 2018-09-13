@@ -16,6 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_shell.c
+ * @brief   Shell code.
+ * @details Shell code as well as shell related channels and streams.
+ *
+ * @addtogroup aos_shell
+ * @{
+ */
+
 #include <aos_shell.h>
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true)
@@ -1519,3 +1528,5 @@ THD_FUNCTION(aosShellThread, shell)
 }
 
 #endif /* AMIROOS_CFG_SHELL_ENABLE == true */
+
+/** @} */

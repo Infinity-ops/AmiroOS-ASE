@@ -16,6 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_system.c
+ * @brief   System code.
+ * @details Contains system initialization and shutdown routines
+ *          and system shell commands.
+ *
+ * @addtogroup aos_system
+ * @{
+ */
+
 #include <aos_system.h>
 
 #include <amiroos.h>
@@ -1034,3 +1044,5 @@ void aosSysShutdownFinal(aos_shutdown_t shutdown)
 
   return;
 }
+
+/** @} */

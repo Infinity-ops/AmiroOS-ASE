@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_thread.h
+ * @brief   Thread macros and inline functions.
+ *
+ * @addtogroup aos_threads
+ * @{
+ */
+
 #ifndef _AMIROOS_THREAD_H_
 #define _AMIROOS_THREAD_H_
 
@@ -230,3 +238,5 @@ static inline void aosThdSleepUntil(const aos_timestamp_t* t)
 }
 
 #endif /* _AMIROOS_THREAD_H_ */
+
+/** @} */

@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_timer.h
+ * @brief   Timer macros and structures.
+ *
+ * @addtogroup aos_timers
+ * @{
+ */
+
 #ifndef _AMIROOS_TIMER_H_
 #define _AMIROOS_TIMER_H_
 
@@ -248,3 +256,5 @@ static inline void aosPeriodicTimerSetLong(aos_periodictimer_t* ptimer, aos_long
 }
 
 #endif /* _AMIROOS_TIMER_H_ */
+
+/** @} */
