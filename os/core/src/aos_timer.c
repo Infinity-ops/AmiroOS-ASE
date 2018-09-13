@@ -16,6 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_timer.c
+ * @brief   Timer code.
+ * @details Implementation of aos_timer_t and aos_periodictimer_t functions.
+ *
+ * @addtogroup aos_timers
+ * @{
+ */
+
 #include <aos_timer.h>
 
 #include <aos_system.h>
@@ -283,3 +292,5 @@ void aosPeriodicTimerSetLongI(aos_periodictimer_t* ptimer, aos_longinterval_t* i
 
   return;
 }
+
+/** @} */

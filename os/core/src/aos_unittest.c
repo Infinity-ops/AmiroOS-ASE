@@ -16,6 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_unittest.c
+ * @brief   Unittest code.
+ * @details Functions to initialize and run unittests, 
+ *          as well as utility functions to be used in unittests.
+ *
+ * @addtogroup aos_unittests
+ * @{
+ */
+
 #include <aos_unittest.h>
 
 #if (AMIROOS_CFG_TESTS_ENABLE == true) || defined(__DOXYGEN__)
@@ -262,3 +272,5 @@ void aosUtInfoMsg(BaseSequentialStream* stream, const char* fmt, ...)
 }
 
 #endif /* AMIROOS_CFG_TESTS_ENABLE == true */
+
+/** @} */

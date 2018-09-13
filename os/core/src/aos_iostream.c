@@ -16,6 +16,15 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_iostream.c
+ * @brief   Stream and channel code.
+ * @details Implementation of the aos_ostrem and aos_iochannel.
+ *
+ * @addtogroup aos_stream
+ * @{
+ */
+
 #include <aos_iostream.h>
 
 #include <aos_debug.h>
@@ -375,3 +384,5 @@ void aosIOChannelOutputDisable(AosIOChannel* channel)
 
   return;
 }
+
+/** @} */

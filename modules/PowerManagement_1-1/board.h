@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   PowerManagement v1.1 Board specific macros.
+ *
+ * @addtogroup powermanagement_board
+ * @{
+ */
+
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
@@ -1372,3 +1380,5 @@ extern "C" {
 #endif /* _FROM_ASM_ */
 
 #endif /* _BOARD_H_ */
+
+/** @} */

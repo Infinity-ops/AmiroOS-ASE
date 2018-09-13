@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   PowerManagement v1.1 Board specific initializations.
+ *
+ * @addtogroup powermanagement_board
+ * @{
+ */
+
 #include <hal.h>
 #include <stm32_gpio.h>
 
@@ -201,3 +209,5 @@ void __early_init(void) {
  */
 void boardInit(void) {
 }
+
+/** @} */

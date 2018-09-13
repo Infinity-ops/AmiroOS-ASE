@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_shell.h
+ * @brief   Shell macros and structures.
+ *
+ * @addtogroup aos_shell
+ * @{
+ */
+
 #ifndef _AMIROOS_SHELL_H_
 #define _AMIROOS_SHELL_H_
 
@@ -364,3 +372,5 @@ extern "C" {
 #endif /* AMIROOS_CFG_SHELL_ENABLE == true */
 
 #endif /* _AMIROOS_SHELL_H_ */
+
+/** @} */

@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/.
 */
 
+/**
+ * @file    aos_time.h
+ * @brief   Time related constants and data types.
+ *
+ * @addtogroup aos_time
+ * @{
+ */
+
 #ifndef _AMIROOS_TIME_H_
 #define _AMIROOS_TIME_H_
 
@@ -213,3 +221,5 @@ extern "C" {
 #endif
 
 #endif /* _AMIROOS_TIME_H_ */
+
+/** @} */

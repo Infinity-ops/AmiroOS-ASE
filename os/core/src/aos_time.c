@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_time.c
+ * @brief   Time related function implementations.
+ *
+ * @addtogroup aos_time
+ * @{
+ */
+
 #include <aos_time.h>
 
 #include <aos_debug.h>
@@ -48,3 +56,5 @@ uint8_t aosTimeDayOfWeekFromDate(const uint16_t day, const uint8_t month, const 
 
   return ((h + 5) % 7) + 1;
 }
+
+/** @} */

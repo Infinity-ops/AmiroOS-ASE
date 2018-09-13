@@ -1,0 +1,93 @@
+/*
+AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
+Copyright (C) 2016..2018  Thomas Schöpping et al.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/**
+ * @defgroup diwheeldrive_conf Configurations
+ * @ingroup diwheeldrive
+ */
+
+/**
+ * @defgroup DIWHEELDRIVE_HAL_CONF HAL Configuration
+ * @ingroup diwheeldrive_conf
+ */
+
+/**
+ * @defgroup diwheeldrive_ch_config ChibiOS Configuration
+ * @ingroup diwheeldrive_conf
+ */
+
+/**
+ * @defgroup diwheeldrive_aos_config AMiRo-OS Configuration
+ * @ingroup diwheeldrive_conf
+ */
+
+/**
+ * @defgroup diwheeldrive_lld_config AMiRo-LLD Configuration
+ * @ingroup diwheeldrive_conf
+ */
+
+/**
+ * @defgroup powermanagement_conf Configurations
+ * @ingroup powermanagement
+ */
+
+/**
+ * @defgroup POWERMANAGEMENT_HAL_CONF HAL Configuration
+ * @ingroup powermanagement_conf
+ */
+
+/**
+ * @defgroup powermanagement_ch_config ChibiOS Configuration
+ * @ingroup powermanagement_conf
+ */
+
+/**
+ * @defgroup powermanagement_aos_config AMiRo-OS Configuration
+ * @ingroup powermanagement_conf
+ */
+
+/**
+ * @defgroup powermanagement_lld_config AMiRo-LLD Configuration
+ * @ingroup powermanagement_conf
+ */
+
+/**
+ * @defgroup lightring_conf Configurations
+ * @ingroup lightring
+ */
+
+/**
+ * @defgroup LIGHTRING_HAL_CONF HAL Configuration
+ * @ingroup lightring_conf
+ */
+
+/**
+ * @defgroup lightring_ch_config ChibiOS Configuration
+ * @ingroup lightring_conf
+ */
+
+/**
+ * @defgroup lightring_aos_config AMiRo-OS Configuration
+ * @ingroup lightring_conf
+ */
+
+/**
+ * @defgroup lightring_lld_config AMiRo-LLD Configuration
+ * @ingroup lightring_conf
+ */
+

@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_debug.c
+ * @brief   Functions necessary to print an error on system halt.
+ *
+ * @addtogroup aos_debug
+ * @{
+ */
+
 #include <aos_debug.h>
 
 #include <hal.h>
@@ -128,3 +136,5 @@ void aosPrintHaltErrorCode(const char* reason)
 
   return;
 }
+
+/** @} */

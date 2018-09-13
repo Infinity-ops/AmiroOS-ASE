@@ -16,6 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_main.cpp
+ * @brief   Main function.
+ * @details Main function with SSSP and initialization,
+ *          extendable via hooks.
+ *
+ * @addtogroup aos_system
+ * @{
+ */
+
 #include <amiroos.h>
 #include <module.h>
 
@@ -1266,3 +1276,5 @@ int main(void)
   // return an error, since this code should not be executed
   return -1;
 }
+
+/** @} */

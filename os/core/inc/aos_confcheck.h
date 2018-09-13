@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    aos_confcheck.h
+ * @brief   Header that checks whether all necessary configurations are correct.
+ *
+ * @addtogroup aos_system
+ * @{
+ */
+
 #ifndef _AMIROOS_CONFCHECK_H_
 #define _AMIROOS_CONFCHECK_H_
 
@@ -101,3 +109,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif /* AMIROOS_CFG_SHELL_ENABLE == true */
 
 #endif /* _AMIROOS_CONFCHECK_H_ */
+
+/** @} */

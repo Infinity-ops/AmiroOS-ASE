@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file    
+ * @brief   DiWheeDrive v1.1 Board specific initializations.
+ *
+ * @addtogroup diwheeldrive_board
+ * @{
+ */
+
 #include <hal.h>
 
 #if HAL_USE_PAL || defined(__DOXYGEN__)
@@ -78,3 +86,5 @@ void boardInit(void) {
                AFIO_MAPR_USART3_REMAP_PARTIALREMAP |
                AFIO_MAPR_I2C1_REMAP;
 }
+
+/** @} */

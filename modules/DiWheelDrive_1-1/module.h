@@ -16,6 +16,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/**
+ * @file   
+ * @brief   Structures and constant for the DiWheelDrive module.
+ *
+ * @addtogroup diwheeldrive_module
+ * @{
+ */
+
 #ifndef _AMIROOS_MODULE_H_
 #define _AMIROOS_MODULE_H_
 
@@ -580,3 +588,5 @@ extern aos_unittest_t moduleUtAlldVcnl4020;
 /** @} */
 
 #endif /* _AMIROOS_MODULE_H_ */
+
+/** @} */

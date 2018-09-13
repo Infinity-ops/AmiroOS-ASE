@@ -20,3 +20,8 @@ build
 # Backup files
 *backup*
 *Backup*
+
+doc/html
+doc/latex
+os/doc/html
+os/doc/latex

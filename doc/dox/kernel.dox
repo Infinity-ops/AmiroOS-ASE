@@ -17,28 +17,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    aos_types.h
- * @brief   Data types used throughout AMiRo-OS
- *
- * @addtogroup aos_types
- * @{
+ * @defgroup chibios ChibiOS
  */
-
-#ifndef _AMIROOS_TYPES_H_
-#define _AMIROOS_TYPES_H_
 
 /**
- * @brief   Error codes used in AMiRo-OS.
+ * @defgroup kernel RT Kernel
+ * @ingroup chibios
  */
-typedef enum {
-  AOS_OK = 0,                 /**< No error, success. */
-  AOS_SUCCESS = 0,            /**< No error, success */
-  AOS_WARNING = 1,            /**< No error, but a warning occurred */
-  AOS_INVALID_ARGUMENTS = 2,  /**< No error, but given arguments are invalid */
-  AOS_ERROR = 0x80,           /**< An error occurred */
-  AOS_FAILURE = 0x80,         /**< An error occurred */
-} aos_status_t;
 
-#endif /* _AMIROOS_TYPES_H_ */
-
-/** @} */
+/**
+ * @defgroup oslib OS Library
+ * @ingroup chibios
+ */
