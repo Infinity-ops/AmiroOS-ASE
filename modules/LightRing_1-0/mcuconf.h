@@ -110,6 +110,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define STM32_I2C_BUSY_TIMEOUT              50
 #define STM32_I2C_I2C1_IRQ_PRIORITY         5
 #define STM32_I2C_I2C2_IRQ_PRIORITY         5
+#define STM32_I2C_I2C1_USE_DMA              TRUE
+#define STM32_I2C_I2C2_USE_DMA              FALSE
 #define STM32_I2C_I2C1_DMA_PRIORITY         3
 #define STM32_I2C_I2C2_DMA_PRIORITY         3
 #define STM32_I2C_DMA_ERROR_HOOK(i2cp)      osalSysHalt("DMA failure")

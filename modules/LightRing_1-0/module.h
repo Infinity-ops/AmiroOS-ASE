@@ -77,6 +77,16 @@ extern SerialConfig moduleHalProgIfConfig;
 extern SPIConfig moduleHalSpiLightConfig;
 
 /**
+ * @brief   SPI interface driver for the wireless transceiver.
+ */
+#define MODULE_HAL_SPI_WL                       SPID2
+
+/**
+ * @brief   Configuration for the SPI interface driver to communicate with the wireless transceiver.
+ */
+extern SPIConfig moduleHalSpiWlConfig;
+
+/**
  * @brief   Real-Time Clock driver.
  */
 #define MODULE_HAL_RTC                          RTCD1
@@ -220,6 +230,7 @@ extern const char* moduleShellPrompt;
   i2cStart(&MODULE_HAL_I2C_EEPROM, &moduleHalI2cEepromConfig);                \
   /* SPI */                                                                   \
   spiStart(&MODULE_HAL_SPI_LIGHT, &moduleHalSpiLightConfig);                  \
+  spiStart(&MODULE_HAL_SPI_WL, &moduleHalSpiWlConfig);                        \
 }
 
 /**
@@ -228,6 +239,7 @@ extern const char* moduleShellPrompt;
 #define MODULE_SHUTDOWN_PERIPHERY_COMM() {                                    \
   /* SPI */                                                                   \
   spiStop(&MODULE_HAL_SPI_LIGHT);                                             \
+  spiStop(&MODULE_HAL_SPI_WL);                                                \
   /* I2C */                                                                   \
   i2cStop(&MODULE_HAL_I2C_EEPROM);                                            \
   /* don't stop the serial driver so messages can still be printed */         \

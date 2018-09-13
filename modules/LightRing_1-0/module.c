@@ -63,6 +63,15 @@ SPIConfig moduleHalSpiLightConfig = {
   /* CR2                         */ SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN,
 };
 
+SPIConfig moduleHalSpiWlConfig = {
+  /* circular buffer mode        */ false,
+  /* callback function pointer   */ NULL,
+  /* chip select line port       */ GPIOB,
+  /* chip select line pad number */ GPIOB_WL_SS_N,
+  /* CR1                         */ SPI_CR1_BR_0,
+  /* CR2                         */ SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN,
+};
+
 /*===========================================================================*/
 /**
  * @name GPIO definitions
