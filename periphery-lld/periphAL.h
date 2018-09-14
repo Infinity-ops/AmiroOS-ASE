@@ -587,6 +587,4 @@ static inline apalExitStatus_t apalSPITransmitAndReceive(apalSPIDriver_t* spid, 
 }
 #endif
 
-#define apalDbgPrintf(fmt, ...)    chprintf((BaseSequentialStream*)&aos.iostream, fmt, ##__VA_ARGS__)
-
 #endif /* _AMIROOS_PERIPHAL_H_ */
