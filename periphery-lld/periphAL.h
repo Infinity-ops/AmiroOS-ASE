@@ -542,6 +542,22 @@ static inline apalExitStatus_t apalSPITransmit(apalSPIDriver_t* spid, const uint
  *
  * @param[in] c   The condition to check.
  */
-#define apalDbgAssert(c)   aosDbgAssert(c)
+#define apalDbgAssert(c)              aosDbgAssert(c)
+
+
+/**
+ * @brief Printf function for messages printed only in debug builds.
+ *
+ * @param[in] fmt   Formatted string to print.
+ */
+#if (AMIROOS_CFG_DBG == true) || defined(__DOXYGEN__)
+#define apalDbgPrintf(fmt, ...)       chprintf((BaseSequentialStream*)&aos.iostream, fmt, ##__VA_ARGS__)
+#else
+#define apalDbgPrintf(fmt, ...) {                         \
+  (void)(fmt);                                            \
+}
+#endif
+
+#define apalDbgPrintf(fmt, ...)    chprintf((BaseSequentialStream*)&aos.iostream, fmt, ##__VA_ARGS__)
 
 #endif /* _AMIROOS_PERIPHAL_H_ */
