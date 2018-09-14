@@ -58,6 +58,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #define AMIROLLD_CFG_USE_TPS2051BDBV
 
+/**
+ * @brief   Enable flag for the DW1000.
+ */
+#define AMIROLLD_CFG_USE_DW1000
+
 #endif /* _ALLDCONF_H_ */
 
 /** @} */

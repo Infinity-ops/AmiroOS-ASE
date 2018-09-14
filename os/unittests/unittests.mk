@@ -50,5 +50,6 @@ UNITTESTSCSRC = $(UNITTESTS_DIR)lld/src/ut_lld_adc.c \
                 $(UNITTESTS_DIR)periphery-lld/src/ut_alld_tps2051bdbv.c \
                 $(UNITTESTS_DIR)periphery-lld/src/ut_alld_tps62113.c \
                 $(UNITTESTS_DIR)periphery-lld/src/ut_alld_tps62113_ina219.c \
-                $(UNITTESTS_DIR)periphery-lld/src/ut_alld_vcnl4020.c
+                $(UNITTESTS_DIR)periphery-lld/src/ut_alld_vcnl4020.c \
+                $(UNITTESTS_DIR)periphery-lld/src/ut_alld_dw1000.c
 

@@ -531,6 +531,35 @@ static inline apalExitStatus_t apalSPITransmit(apalSPIDriver_t* spid, const uint
   return APAL_STATUS_OK;
 }
 
+/**
+ * @brief Transmit data to SPI and receive data afterwards without releasing the bus in between
+ *
+ * @param   spid        The SPI driver to use.
+ * @param   txData      Transmit data buffer.
+ * @param   rxData      Receive data buffer.
+ * @param   txLength    Number of bytes to send.
+ * @param   rxLength    Number of bytes to receive.
+ *
+ * @return The status indicates whether the function call was succesful.
+ */
+static inline apalExitStatus_t apalSPITransmitAndReceive(apalSPIDriver_t* spid, const uint8_t* const txData , uint8_t* const rxData, const size_t txLength, const size_t rxLength)
+{
+  aosDbgCheck(spid != NULL);
+
+#if (SPI_USE_MUTUAL_EXCLUSION)
+  spiAcquireBus(spid);
+#endif
+  spiSelect(spid);
+  spiSend(spid, txLength, txData);
+  spiReceive(spid, rxLength, rxData);
+  spiUnselect(spid);
+#if (SPI_USE_MUTUAL_EXCLUSION)
+  spiReleaseBus(spid);
+#endif
+
+  return APAL_STATUS_OK;
+}
+
 #endif
 
 /*============================================================================*/
