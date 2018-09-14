@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   DiWheeDrive v1.1 Board specific initializations.
  *
  * @addtogroup diwheeldrive_board

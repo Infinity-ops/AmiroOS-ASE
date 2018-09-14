@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   PowerManagement v1.1 Board specific macros.
  *
  * @addtogroup powermanagement_board
@@ -299,6 +299,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * in the initialization code.
  * Please refer to the STM32 Reference Manual for details.
  */
+#define PIN_IGNORE(n)                   (1U << (n))
 #define PIN_MODE_INPUT(n)               (0U << ((n) * 2U))
 #define PIN_MODE_OUTPUT(n)              (1U << ((n) * 2U))
 #define PIN_MODE_ALTERNATE(n)           (2U << ((n) * 2U))
@@ -336,6 +337,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PA14 - SWCLK                         (alternate 0 pushpull floating)
  * PA15 - SYS_SPI_SS1_N                 (input floating)
  */
+#define VAL_GPIOA_IGNORE                0
 #define VAL_GPIOA_MODER                 (PIN_MODE_INPUT(GPIOA_WKUP) |                                 \
                                          PIN_MODE_INPUT(GPIOA_PIN1) |                                 \
                                          PIN_MODE_INPUT(GPIOA_SYS_UART_TX) |                          \
@@ -453,6 +455,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PB14 - BT_CTS                        (inout floating)
  * PB15 - SYS_UART_UP                   (output opendrain high)
  */
+#define VAL_GPIOB_IGNORE                (PIN_IGNORE(GPIOB_POWER_EN) |                                 \
+                                         PIN_IGNORE(GPIOB_SYS_UART_DN) |                              \
+                                         PIN_IGNORE(GPIOB_LED) |                                      \
+                                         PIN_IGNORE(GPIOB_SYS_UART_UP)) & 0
 #define VAL_GPIOB_MODER                 (PIN_MODE_INPUT(GPIOB_IR_INT1_N) |                            \
                                          PIN_MODE_ANALOG(GPIOB_VSYS_SENSE) |                          \
                                          PIN_MODE_OUTPUT(GPIOB_POWER_EN) |                            \
@@ -570,6 +576,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PC14 - SYS_WARMRST_N                 (output opendrain high)
  * PC15 - BT_RST                        (output opendrain high)
  */
+#define VAL_GPIOC_IGNORE                (PIN_IGNORE(GPIOC_CHARGE_EN1_N) |                             \
+                                         PIN_IGNORE(GPIOC_SYS_INT_N) |                                \
+                                         PIN_IGNORE(GPIOC_SYS_PD_N)) & 0
 #define VAL_GPIOC_MODER                 (PIN_MODE_INPUT(GPIOC_CHARGE_STAT1A) |                        \
                                          PIN_MODE_INPUT(GPIOC_GAUGE_BATLOW1) |                        \
                                          PIN_MODE_INPUT(GPIOC_GAUGE_BATGD1_N) |                       \
@@ -687,6 +696,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PD14 - PIN14                         (input floating)
  * PD15 - PIN15                         (input floating)
  */
+#define VAL_GPIOD_IGNORE                (PIN_IGNORE(GPIOD_CHARGE_EN2_N)) & 0
 #define VAL_GPIOD_MODER                 (PIN_MODE_INPUT(GPIOD_PIN0) |                                 \
                                          PIN_MODE_INPUT(GPIOD_PIN1) |                                 \
                                          PIN_MODE_OUTPUT(GPIOD_CHARGE_EN2_N) |                        \
@@ -804,6 +814,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PE14 - PIN14                         (input floating)
  * PE15 - PIN15                         (input floating)
  */
+#define VAL_GPIOE_IGNORE                0
 #define VAL_GPIOE_MODER                 (PIN_MODE_INPUT(GPIOE_PIN0) |                                 \
                                          PIN_MODE_INPUT(GPIOE_PIN1) |                                 \
                                          PIN_MODE_INPUT(GPIOE_PIN2) |                                 \
@@ -921,6 +932,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PF14 - PIN14                         (input floating)
  * PF15 - PIN15                         (input floating)
  */
+#define VAL_GPIOF_IGNORE                0
 #define VAL_GPIOF_MODER                 (PIN_MODE_INPUT(GPIOF_PIN0) |                                 \
                                          PIN_MODE_INPUT(GPIOF_PIN1) |                                 \
                                          PIN_MODE_INPUT(GPIOF_PIN2) |                                 \
@@ -1038,6 +1050,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PG14 - PIN14                         (input floating)
  * PG15 - PIN15                         (input floating)
  */
+#define VAL_GPIOG_IGNORE                0
 #define VAL_GPIOG_MODER                 (PIN_MODE_INPUT(GPIOG_PIN0) |                                 \
                                          PIN_MODE_INPUT(GPIOG_PIN1) |                                 \
                                          PIN_MODE_INPUT(GPIOG_PIN2) |                                 \
@@ -1155,6 +1168,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PH14 - PIN14                         (input floating)
  * PH15 - PIN15                         (input floating)
  */
+#define VAL_GPIOH_IGNORE                0
 #define VAL_GPIOH_MODER                 (PIN_MODE_INPUT(GPIOH_OSC_IN) |                               \
                                          PIN_MODE_INPUT(GPIOH_OSC_OUT) |                              \
                                          PIN_MODE_INPUT(GPIOH_PIN2) |                                 \
@@ -1272,6 +1286,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PI14 - PIN14                         (input floating)
  * PI15 - PIN15                         (input floating)
  */
+#define VAL_GPIOI_IGNORE                0
 #define VAL_GPIOI_MODER                 (PIN_MODE_INPUT(GPIOI_PIN0) |                                 \
                                          PIN_MODE_INPUT(GPIOI_PIN1) |                                 \
                                          PIN_MODE_INPUT(GPIOI_PIN2) |                                 \

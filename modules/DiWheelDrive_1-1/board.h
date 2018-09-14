@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   DiWheeDrive v1.1 Board specific macros.
  *
  * @addtogroup diwheeldrive_board
@@ -252,6 +252,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PIN_CR(pin, mode, cnf)      (((mode) | ((cnf) << 2U)) << (((pin) % 8U) * 4U))
 #define PIN_ODR_LOW(n)              (0U << (n))
 #define PIN_ODR_HIGH(n)             (1U << (n))
+#define PIN_IGNORE(n)               (1U << (n))
 
 /*
  * GPIOA setup:
@@ -273,6 +274,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PA14 - SWCLK                     (input pullup)
  * PA15 - DRIVE_PWM2B               (alternate pushpull 50MHz)
  */
+#define VAL_GPIOAIGN                (PIN_IGNORE(GPIOA_LED)) & 0
 #define VAL_GPIOACRL                (PIN_CR(GPIOA_WKUP, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOA_LED, PIN_MODE_OUTPUT_50M, PIN_CNF_OUTPUT_OPENDRAIN) |            \
                                      PIN_CR(GPIOA_DRIVE_PWM1A, PIN_MODE_OUTPUT_50M, PIN_CNF_ALTERNATE_PUSHPULL) |  \
@@ -326,6 +328,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PB14 - SYS_UART_UP               (output opendrain high 50MHz)
  * PB15 - ACCEL_INT_N               (input pullup)
  */
+#define VAL_GPIOBIGN                (PIN_IGNORE(GPIOB_SYS_UART_UP)) & 0
 #define VAL_GPIOBCRL                (PIN_CR(GPIOB_PIN0, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOB_DRIVE_SENSE2, PIN_MODE_INPUT, PIN_CNF_INPUT_ANALOG) |            \
                                      PIN_CR(GPIOB_POWER_EN, PIN_MODE_OUTPUT_50M, PIN_CNF_OUTPUT_PUSHPULL) |        \
@@ -379,8 +382,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PC14 - GYRO_SS_N                 (output pushpull high 50MHz)
  * PC15 - PIN15                     (input floating)
  */
+#define VAL_GPIOCIGN                (PIN_IGNORE(GPIOC_SYS_INT_N) |                                                 \
+                                     PIN_IGNORE(GPIOC_SYS_PD_N)) & 0
 #define VAL_GPIOCCRL                (PIN_CR(GPIOC_DRIVE_SENSE1, PIN_MODE_INPUT, PIN_CNF_INPUT_ANALOG) |            \
-                                     PIN_CR(GPIOC_SYS_INT_N, PIN_MODE_OUTPUT_50M, PIN_CNF_OUTPUT_OPENDRAIN) |           \
+                                     PIN_CR(GPIOC_SYS_INT_N, PIN_MODE_OUTPUT_50M, PIN_CNF_OUTPUT_OPENDRAIN) |      \
                                      PIN_CR(GPIOC_PIN2, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOC_PATH_DCSTAT, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |           \
                                      PIN_CR(GPIOC_PIN4, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
@@ -432,6 +437,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PD14 - PIN14                     (input floating)
  * PD15 - PIN15                     (input floating)
  */
+#define VAL_GPIODIGN                0
 #define VAL_GPIODCRL                (PIN_CR(GPIOD_OSC_IN, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                \
                                      PIN_CR(GPIOD_OSC_OUT, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |               \
                                      PIN_CR(GPIOD_SYS_WARMRST_N, PIN_MODE_OUTPUT_50M, PIN_CNF_OUTPUT_OPENDRAIN) |  \
@@ -485,6 +491,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PE14 - PIN14                     (input floating)
  * PE15 - PIN15                     (input floating)
  */
+#define VAL_GPIOEIGN                0
 #define VAL_GPIOECRL                (PIN_CR(GPIOE_PIN0, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOE_PIN1, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOE_PIN2, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
@@ -538,6 +545,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PF14 - PIN14                     (input floating)
  * PF15 - PIN15                     (input floating)
  */
+#define VAL_GPIOFIGN                0
 #define VAL_GPIOFCRL                (PIN_CR(GPIOF_PIN0, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOF_PIN1, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOF_PIN2, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
@@ -591,6 +599,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * PG14 - PIN14                     (input floating)
  * PG15 - PIN15                     (input floating)
  */
+#define VAL_GPIOGIGN                0
 #define VAL_GPIOGCRL                (PIN_CR(GPIOG_PIN0, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOG_PIN1, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \
                                      PIN_CR(GPIOG_PIN2, PIN_MODE_INPUT, PIN_CNF_INPUT_FLOATING) |                  \

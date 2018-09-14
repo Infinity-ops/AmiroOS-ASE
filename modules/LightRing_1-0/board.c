@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   LightRing v1.0 Board specific initializations.
  *
  * @addtogroup lightring_board
