@@ -123,9 +123,7 @@ AMIROOS = ../../os
 include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f1xx.mk
 # HAL-OSAL files
 include $(CHIBIOS)/os/hal/hal.mk
-include $(AMIROOS)/hal/hal.mk
 include $(CHIBIOS)/os/hal/ports/STM32/STM32F1xx/platform.mk
-include $(AMIROOS)/hal/ports/STM32/platform.mk
 include ./board.mk
 include $(CHIBIOS)/os/hal/osal/rt/osal.mk
 # RTOS files

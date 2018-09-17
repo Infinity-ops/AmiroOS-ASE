@@ -33,4 +33,4 @@ BOARDINC = $(BOARD_DIR)
 BOARDSRC = $(BOARD_DIR)board.c
 
 # linker path
-BOARDLD = $(AMIROOS)/hal/ports
+BOARDLD = $(BOARD_DIR)
