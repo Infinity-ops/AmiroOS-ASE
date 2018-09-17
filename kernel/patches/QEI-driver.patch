@@ -1,0 +1,1832 @@
+commit a23878ddb85bb8fd069f02042f15ad4be2a0d709
+Author: Marc Rothmann <mrothmann@techfak.uni-bielefeld.de>
+Date:   Mon Sep 17 11:40:39 2018 +0200
+
+    Added QEI driver to HAL.
+
+diff --git a/os/hal/hal.mk b/os/hal/hal.mk
+index f177a3f..64d96d9 100644
+--- a/os/hal/hal.mk
++++ b/os/hal/hal.mk
+@@ -41,6 +41,9 @@ endif
+ ifneq ($(findstring HAL_USE_ICU TRUE,$(HALCONF)),)
+ HALSRC += $(CHIBIOS)/os/hal/src/hal_icu.c
+ endif
++ifneq ($(findstring HAL_USE_QEI TRUE,$(HALCONF)),)
++HALSRC += $(CHIBIOS)/os/hal/src/hal_qei.c
++endif
+ ifneq ($(findstring HAL_USE_MAC TRUE,$(HALCONF)),)
+ HALSRC += $(CHIBIOS)/os/hal/src/hal_mac.c
+ endif
+@@ -94,6 +97,7 @@ HALSRC = $(CHIBIOS)/os/hal/src/hal.c \
+          $(CHIBIOS)/os/hal/src/hal_i2c.c \
+          $(CHIBIOS)/os/hal/src/hal_i2s.c \
+          $(CHIBIOS)/os/hal/src/hal_icu.c \
++         $(CHIBIOS)/os/hal/src/hal_qei.c \
+          $(CHIBIOS)/os/hal/src/hal_mac.c \
+          $(CHIBIOS)/os/hal/src/hal_mmc_spi.c \
+          $(CHIBIOS)/os/hal/src/hal_pal.c \
+diff --git a/os/hal/include/hal_qei.h b/os/hal/include/hal_qei.h
+new file mode 100644
+index 0000000..aef5e62
+--- /dev/null
++++ b/os/hal/include/hal_qei.h
+@@ -0,0 +1,148 @@
++/*
++AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
++Copyright (C) 2016..2018  Thomas Schöpping et al.
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++/**
++ * @file    hal_qei.h
++ * @brief   QEI Driver macros and structures.
++ *
++ * @addtogroup QEI
++ * @{
++ */
++
++#ifndef _HAL_QEI_H_
++#define _HAL_QEI_H_
++
++#if HAL_USE_QEI || defined(__DOXYGEN__)
++
++/*===========================================================================*/
++/* Driver constants.                                                         */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver pre-compile time settings.                                         */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Derived constants and error checks.                                       */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver data structures and types.                                         */
++/*===========================================================================*/
++
++/**
++ * @brief   Driver state machine possible states.
++ */
++typedef enum {
++  QEI_UNINIT = 0,                   /**< Not initialized.                   */
++  QEI_STOP = 1,                     /**< Stopped.                           */
++  QEI_READY = 2,                    /**< Ready.                             */
++  QEI_ACTIVE = 4,                   /**< Active.                            */
++} qeistate_t;
++
++/**
++ * @brief   Type of a structure representing an QEI driver.
++ */
++typedef struct QEIDriver QEIDriver;
++
++#include "hal_qei_lld.h"
++
++/*===========================================================================*/
++/* Driver macros.                                                            */
++/*===========================================================================*/
++
++/**
++ * @name    Macro Functions
++ * @{
++ */
++/**
++ * @brief   Enables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @iclass
++ */
++#define qeiEnableI(qeip) qei_lld_enable(qeip)
++
++/**
++ * @brief   Disables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @iclass
++ */
++#define qeiDisableI(qeip) qei_lld_disable(qeip)
++
++/**
++ * @brief   Returns the direction of the last transition.
++ * @details The direction is defined as boolean and is
++ *          calculated at each transition on any input.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The request direction.
++ * @retval FALSE        Position counted up.
++ * @retval TRUE         Position counted down.
++ * @iclass
++ */
++#define qeiGetDirectionI(qeip) qei_lld_get_direction(qeip)
++
++/**
++ * @brief   Returns the position of the encoder.
++ * @details The position is defined as number of pulses since last reset.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The number of pulses.
++ *
++ * @iclass
++ */
++#define qeiGetPositionI(qeip) qei_lld_get_position(qeip)
++
++/**
++ * @brief   Returns the range of the encoder.
++ * @details The range is defined as number of maximum pulse count.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The number of pulses.
++ *
++ * @iclass
++ */
++#define qeiGetRangeI(qeip) qei_lld_get_range(qeip)
++/** @} */
++
++/*===========================================================================*/
++/* External declarations.                                                    */
++/*===========================================================================*/
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++  void qeiInit(void);
++  void qeiObjectInit(QEIDriver *qeip);
++  void qeiStart(QEIDriver *qeip, const QEIConfig *config);
++  void qeiStop(QEIDriver *qeip);
++  void qeiEnable(QEIDriver *qeip);
++  void qeiDisable(QEIDriver *qeip);
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* HAL_USE_QEI */
++
++#endif /* _HAL_QEI_H_ */
++
++/** @} */
+diff --git a/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.c b/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.c
+index 6ade226..96c9da0 100644
+--- a/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.c
++++ b/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.c
+@@ -34,6 +34,7 @@
+ /* Driver local definitions.                                                 */
+ /*===========================================================================*/
+ 
++#if STM32_I2C_I2C1_USE_DMA
+ #define I2C1_RX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C1_RX_DMA_STREAM,                        \
+                        STM32_I2C1_RX_DMA_CHN)
+@@ -41,7 +42,9 @@
+ #define I2C1_TX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C1_TX_DMA_STREAM,                        \
+                        STM32_I2C1_TX_DMA_CHN)
++#endif
+ 
++#if STM32_I2C_I2C2_USE_DMA
+ #define I2C2_RX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C2_RX_DMA_STREAM,                        \
+                        STM32_I2C2_RX_DMA_CHN)
+@@ -49,7 +52,9 @@
+ #define I2C2_TX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C2_TX_DMA_STREAM,                        \
+                        STM32_I2C2_TX_DMA_CHN)
++#endif
+ 
++#if STM32_I2C_I2C3_USE_DMA
+ #define I2C3_RX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C3_RX_DMA_STREAM,                        \
+                        STM32_I2C3_RX_DMA_CHN)
+@@ -57,6 +62,7 @@
+ #define I2C3_TX_DMA_CHANNEL                                                 \
+   STM32_DMA_GETCHANNEL(STM32_I2C_I2C3_TX_DMA_STREAM,                        \
+                        STM32_I2C3_TX_DMA_CHN)
++#endif
+ 
+ /*===========================================================================*/
+ /* Driver constants.                                                         */
+@@ -72,6 +78,20 @@
+ #define I2C_EV6_MASTER_REC_MODE_SELECTED                                    \
+   ((uint32_t)(((I2C_SR2_MSL | I2C_SR2_BUSY)<< 16) | I2C_SR1_ADDR))
+ 
++#define I2C_EV7_MASTER_REC_BYTE_RECEIVED                                    \
++  ((uint32_t)(((I2C_SR2_MSL | I2C_SR2_BUSY)<< 16) | I2C_SR1_RXNE))
++
++#define I2C_EV7_MASTER_REC_BYTE_RECEIVED_STOP                               \
++  ((uint32_t)(I2C_SR1_RXNE))
++
++#define I2C_EV7_2_EV7_3_MASTER_REC_BYTE_QUEUED                              \
++  ((uint32_t)(((I2C_SR2_MSL | I2C_SR2_BUSY)<< 16) |                         \
++              I2C_SR1_BTF | I2C_SR1_RXNE))
++
++#define I2C_EV8_MASTER_BYTE_TRANSMITTING                                    \
++  ((uint32_t)(((I2C_SR2_MSL | I2C_SR2_BUSY | I2C_SR2_TRA)<< 16) |           \
++              I2C_SR1_TXE))
++
+ #define I2C_EV8_2_MASTER_BYTE_TRANSMITTED                                   \
+   ((uint32_t)(((I2C_SR2_MSL | I2C_SR2_BUSY | I2C_SR2_TRA) << 16) |          \
+               I2C_SR1_BTF | I2C_SR1_TXE))
+@@ -129,8 +149,24 @@ static void i2c_lld_abort_operation(I2CDriver *i2cp) {
+   dp->SR1 = 0;
+ 
+   /* Stops the associated DMA streams.*/
+-  dmaStreamDisable(i2cp->dmatx);
+-  dmaStreamDisable(i2cp->dmarx);
++#if STM32_I2C_USE_I2C1 && STM32_I2C_I2C1_USE_DMA
++  if (&I2CD1 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
++#if STM32_I2C_USE_I2C2 && STM32_I2C_I2C2_USE_DMA
++  if (&I2CD2 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
++#if STM32_I2C_USE_I2C3 && STM32_I2C_I2C3_USE_DMA
++  if (&I2CD3 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
+ }
+ 
+ /**
+@@ -236,13 +272,17 @@ static void i2c_lld_set_opmode(I2CDriver *i2cp) {
+ }
+ 
+ /**
+- * @brief   I2C shared ISR code.
++ * @brief   I2C shared ISR code for DMA access.
+  *
+  * @param[in] i2cp      pointer to the @p I2CDriver object
+  *
+  * @notapi
+  */
+-static void i2c_lld_serve_event_interrupt(I2CDriver *i2cp) {
++#if (STM32_I2C_USE_I2C1 && STM32_I2C_I2C1_USE_DMA) ||                       \
++    (STM32_I2C_USE_I2C2 && STM32_I2C_I2C2_USE_DMA) ||                       \
++    (STM32_I2C_USE_I2C3 && STM32_I2C_I2C3_USE_DMA) ||                       \
++    defined(__DOXYGEN__)
++static void i2c_lld_serve_event_interrupt_dma(I2CDriver *i2cp) {
+   I2C_TypeDef *dp = i2cp->i2c;
+   uint32_t regSR2 = dp->SR2;
+   uint32_t event = dp->SR1;
+@@ -252,7 +292,7 @@ static void i2c_lld_serve_event_interrupt(I2CDriver *i2cp) {
+      done by the DMA.*/
+   switch (I2C_EV_MASK & (event | (regSR2 << 16))) {
+   case I2C_EV5_MASTER_MODE_SELECT:
+-    if ((i2cp->addr >> 8) > 0) { 
++    if ((i2cp->addr >> 8) > 0) {
+       /* 10-bit address: 1 1 1 1 0 X X R/W */
+       dp->DR = 0xF0 | (0x6 & (i2cp->addr >> 8)) | (0x1 & i2cp->addr);
+     } else {
+@@ -293,6 +333,140 @@ static void i2c_lld_serve_event_interrupt(I2CDriver *i2cp) {
+   if (event & (I2C_SR1_ADDR | I2C_SR1_ADD10))
+     (void)dp->SR2;
+ }
++#endif /* any I2CDx uses DMA mode */
++
++/**
++ * @brief   I2C shared ISR code for non-DMA access.
++ *
++ * @param[in] i2cp      pointer to the @p I2CDriver object
++ *
++ * @notapi
++ */
++#if (STM32_I2C_USE_I2C1 && !STM32_I2C_I2C1_USE_DMA) ||                      \
++    (STM32_I2C_USE_I2C2 && !STM32_I2C_I2C2_USE_DMA) ||                      \
++    (STM32_I2C_USE_I2C3 && !STM32_I2C_I2C3_USE_DMA) ||                      \
++    defined(__DOXYGEN__)
++static void i2c_lld_serve_event_interrupt_isr(I2CDriver *i2cp) {
++  I2C_TypeDef *dp = i2cp->i2c;
++  uint32_t regSR2 = dp->SR2;
++  uint32_t event = dp->SR1;
++
++  switch (I2C_EV_MASK & (event | (regSR2 << 16))) {
++  case I2C_EV5_MASTER_MODE_SELECT:
++    dp->CR2 |= I2C_CR2_ITBUFEN;
++    dp->DR = i2cp->addr;
++    break;
++  case I2C_EV6_MASTER_TRA_MODE_SELECTED:
++    (void)dp->SR2; // clear ADDR flag
++    /* EV8_1 */
++    dp->DR = *(i2cp->txbuf);
++
++    ++i2cp->txbuf;
++    --i2cp->txbytes;
++
++    /* if N == 1, skip the I2C_EV8_MASTER_BYTE_TRANSMITTING event
++     * but enter I2C_EV8_2_MASTER_BYTE_TRANSMITTED next */
++    if (i2cp->txbytes == 0) {
++      dp->CR2 &= ~I2C_CR2_ITBUFEN;
++    }
++    break;
++  case I2C_EV6_MASTER_REC_MODE_SELECTED:
++    switch (i2cp->rxbytes) {
++    case 1:
++      dp->CR1 &= ~I2C_CR1_ACK;
++      (void)dp->SR2; // clear ADDR flag
++      dp->CR1 |= I2C_CR1_STOP;
++      break;
++    case 2:
++      (void)dp->SR2; // clear ADDR flag
++      /* EV6_1 */
++      dp->CR1 |= I2C_CR1_POS;
++      dp->CR1 &= ~I2C_CR1_ACK;
++      dp->CR2 &= ~I2C_CR2_ITBUFEN;
++      break;
++    case 3: /* N == 3 is a very special case, since EV7 is completely skipped */
++      (void)dp->SR2; // clear ADDR flag
++      /* Disable the I2C_EV7_MASTER_REC_BYTE_RECEIVED event
++       * but enter I2C_EV7_MASTER_REC_BYTE_RECEIVED_STOP next */
++      dp->CR2 &= ~I2C_CR2_ITBUFEN;
++      break;
++    default: /* N > 2 */
++      (void)dp->SR2; // clear ADDR flag
++      break;
++    }
++    break;
++  case I2C_EV7_MASTER_REC_BYTE_RECEIVED:
++    if (i2cp->rxbytes > 3) {
++      *(i2cp->rxbuf) = dp->DR;
++      ++i2cp->rxbuf;
++      --i2cp->rxbytes;
++    }
++    if (i2cp->rxbytes == 3) {
++      /* Disable this event for DataN-2, but force into event
++       * I2C_EV7_2_EV7_3_MASTER_REC_BYTE_RECEIVED_QUEUED by not reading dp->DR. */
++      dp->CR2 &= ~I2C_CR2_ITBUFEN;
++    }
++    break;
++  case I2C_EV7_MASTER_REC_BYTE_RECEIVED_STOP:
++    osalDbgAssert(i2cp->rxbytes == 1, "more than 1 byte to be received");
++    *(i2cp->rxbuf) = dp->DR;
++    --i2cp->rxbytes;
++    dp->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
++    _i2c_wakeup_isr(i2cp);
++    break;
++  case I2C_EV7_2_EV7_3_MASTER_REC_BYTE_QUEUED:
++    if (i2cp->rxbytes == 3) {
++      /* EV7_2 (N > 2) */
++      dp->CR1 &= ~I2C_CR1_ACK;
++      *(i2cp->rxbuf) = dp->DR;
++      ++i2cp->rxbuf;
++      dp->CR1 |= I2C_CR1_STOP;
++      *(i2cp->rxbuf) = dp->DR;
++      ++i2cp->rxbuf;
++      i2cp->rxbytes -= 2;
++      /* enable I2C_EV7_MASTER_REC_BYTE_RECEIVED_STOP event */
++      dp->CR2 |= I2C_CR2_ITBUFEN;
++    } else {
++      /* EV7_3 (N == 2) */
++      dp->CR1 |= I2C_CR1_STOP;
++      *(i2cp->rxbuf) = dp->DR;
++      ++i2cp->rxbuf;
++      *(i2cp->rxbuf) = dp->DR;
++      i2cp->rxbytes -= 2;
++
++      dp->CR1 &= ~I2C_CR1_POS;
++      dp->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
++
++      _i2c_wakeup_isr(i2cp);
++    }
++    break;
++  case I2C_EV8_MASTER_BYTE_TRANSMITTING:
++    dp->DR = *(i2cp->txbuf);
++    ++i2cp->txbuf;
++    --i2cp->txbytes;
++
++    /* if this was the last byte, ensure that this event is not entered again */
++    if (i2cp->txbytes == 0) {
++      dp->CR2 &= ~I2C_CR2_ITBUFEN;
++    }
++    break;
++  case I2C_EV8_2_MASTER_BYTE_TRANSMITTED:
++    if (i2cp->rxbytes > 0) {
++      /* start "read after write" operation (LSB of address = 1 => read) */
++      i2cp->addr |= 0x01;
++      dp->CR1 |= I2C_CR1_START | I2C_CR1_ACK;
++    } else {
++      dp->CR1 |= I2C_CR1_STOP;
++      dp->CR2 &= ~(I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN);
++      _i2c_wakeup_isr(i2cp);
++    }
++    break;
++  default:
++    osalDbgAssert(i2cp->rxbytes != 1, "more than 1 byte to be received");
++    break;
++  }
++}
++#endif /* any I2CDx uses non-DMA mode */
+ 
+ /**
+  * @brief   DMA RX end IRQ handler.
+@@ -302,6 +476,10 @@ static void i2c_lld_serve_event_interrupt(I2CDriver *i2cp) {
+  *
+  * @notapi
+  */
++#if (STM32_I2C_USE_I2C1 && STM32_I2C_I2C1_USE_DMA) ||                      \
++    (STM32_I2C_USE_I2C2 && STM32_I2C_I2C2_USE_DMA) ||                      \
++    (STM32_I2C_USE_I2C3 && STM32_I2C_I2C3_USE_DMA) ||                      \
++    defined(__DOXYGEN__)
+ static void i2c_lld_serve_rx_end_irq(I2CDriver *i2cp, uint32_t flags) {
+   I2C_TypeDef *dp = i2cp->i2c;
+ 
+@@ -347,6 +525,7 @@ static void i2c_lld_serve_tx_end_irq(I2CDriver *i2cp, uint32_t flags) {
+      of R/W transaction itself.*/
+   dp->CR2 |= I2C_CR2_ITEVTEN;
+ }
++#endif /* any I2CDx uses DMA mode */
+ 
+ /**
+  * @brief   I2C error handler.
+@@ -359,8 +538,24 @@ static void i2c_lld_serve_tx_end_irq(I2CDriver *i2cp, uint32_t flags) {
+ static void i2c_lld_serve_error_interrupt(I2CDriver *i2cp, uint16_t sr) {
+ 
+   /* Clears interrupt flags just to be safe.*/
+-  dmaStreamDisable(i2cp->dmatx);
+-  dmaStreamDisable(i2cp->dmarx);
++#if STM32_I2C_USE_I2C1 && STM32_I2C_I2C1_USE_DMA
++  if (&I2CD1 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
++#if STM32_I2C_USE_I2C2 && STM32_I2C_I2C2_USE_DMA
++  if (&I2CD2 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
++#if STM32_I2C_USE_I2C3 && STM32_I2C_I2C3_USE_DMA
++  if (&I2CD3 == i2cp) {
++    dmaStreamDisable(i2cp->dmatx);
++    dmaStreamDisable(i2cp->dmarx);
++  }
++#endif
+ 
+   i2cp->errors = I2C_NO_ERROR;
+ 
+@@ -407,7 +602,11 @@ OSAL_IRQ_HANDLER(STM32_I2C1_EVENT_HANDLER) {
+ 
+   OSAL_IRQ_PROLOGUE();
+ 
+-  i2c_lld_serve_event_interrupt(&I2CD1);
++#if STM32_I2C_I2C1_USE_DMA
++  i2c_lld_serve_event_interrupt_dma(&I2CD1);
++#else
++  i2c_lld_serve_event_interrupt_isr(&I2CD1);
++#endif
+ 
+   OSAL_IRQ_EPILOGUE();
+ }
+@@ -437,7 +636,11 @@ OSAL_IRQ_HANDLER(STM32_I2C2_EVENT_HANDLER) {
+ 
+   OSAL_IRQ_PROLOGUE();
+ 
+-  i2c_lld_serve_event_interrupt(&I2CD2);
++#if STM32_I2C_I2C2_USE_DMA
++  i2c_lld_serve_event_interrupt_dma(&I2CD2);
++#else
++  i2c_lld_serve_event_interrupt_isr(&I2CD2);
++#endif
+ 
+   OSAL_IRQ_EPILOGUE();
+ }
+@@ -469,7 +672,11 @@ OSAL_IRQ_HANDLER(STM32_I2C3_EVENT_HANDLER) {
+ 
+   OSAL_IRQ_PROLOGUE();
+ 
+-  i2c_lld_serve_event_interrupt(&I2CD3);
++#if STM32_I2C_I2C3_USE_DMA
++  i2c_lld_serve_event_interrupt_dma(&I2CD3);
++#else
++  i2c_lld_serve_event_interrupt_isr(&I2CD3);
++#endif
+ 
+   OSAL_IRQ_EPILOGUE();
+ }
+@@ -506,24 +713,30 @@ void i2c_lld_init(void) {
+   i2cObjectInit(&I2CD1);
+   I2CD1.thread = NULL;
+   I2CD1.i2c    = I2C1;
++#if STM32_I2C_I2C1_USE_DMA
+   I2CD1.dmarx  = STM32_DMA_STREAM(STM32_I2C_I2C1_RX_DMA_STREAM);
+   I2CD1.dmatx  = STM32_DMA_STREAM(STM32_I2C_I2C1_TX_DMA_STREAM);
++#endif
+ #endif /* STM32_I2C_USE_I2C1 */
+ 
+ #if STM32_I2C_USE_I2C2
+   i2cObjectInit(&I2CD2);
+   I2CD2.thread = NULL;
+   I2CD2.i2c    = I2C2;
++#if STM32_I2C_I2C2_USE_DMA
+   I2CD2.dmarx  = STM32_DMA_STREAM(STM32_I2C_I2C2_RX_DMA_STREAM);
+   I2CD2.dmatx  = STM32_DMA_STREAM(STM32_I2C_I2C2_TX_DMA_STREAM);
++#endif
+ #endif /* STM32_I2C_USE_I2C2 */
+ 
+ #if STM32_I2C_USE_I2C3
+   i2cObjectInit(&I2CD3);
+   I2CD3.thread = NULL;
+   I2CD3.i2c    = I2C3;
++#if STM32_I2C_I2C3_USE_DMA
+   I2CD3.dmarx  = STM32_DMA_STREAM(STM32_I2C_I2C3_RX_DMA_STREAM);
+   I2CD3.dmatx  = STM32_DMA_STREAM(STM32_I2C_I2C3_TX_DMA_STREAM);
++#endif
+ #endif /* STM32_I2C_USE_I2C3 */
+ }
+ 
+@@ -540,20 +753,24 @@ void i2c_lld_start(I2CDriver *i2cp) {
+   /* If in stopped state then enables the I2C and DMA clocks.*/
+   if (i2cp->state == I2C_STOP) {
+ 
+-    i2cp->txdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
+-                      STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
+-                      STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
+-                      STM32_DMA_CR_DIR_M2P;
+-    i2cp->rxdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
+-                      STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
+-                      STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
+-                      STM32_DMA_CR_DIR_P2M;
+-
+ #if STM32_I2C_USE_I2C1
+     if (&I2CD1 == i2cp) {
++#if STM32_I2C_I2C1_USE_DMA
+       bool b;
+ 
++      i2cp->txdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_M2P;
++      i2cp->rxdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_P2M;
++#endif
++
+       rccResetI2C1();
++
++#if STM32_I2C_I2C1_USE_DMA
+       b = dmaStreamAllocate(i2cp->dmarx,
+                             STM32_I2C_I2C1_IRQ_PRIORITY,
+                             (stm32_dmaisr_t)i2c_lld_serve_rx_end_irq,
+@@ -564,22 +781,52 @@ void i2c_lld_start(I2CDriver *i2cp) {
+                             (stm32_dmaisr_t)i2c_lld_serve_tx_end_irq,
+                             (void *)i2cp);
+       osalDbgAssert(!b, "stream already allocated");
++#endif
++
+       rccEnableI2C1(true);
+       nvicEnableVector(I2C1_EV_IRQn, STM32_I2C_I2C1_IRQ_PRIORITY);
+       nvicEnableVector(I2C1_ER_IRQn, STM32_I2C_I2C1_IRQ_PRIORITY);
+ 
++#if STM32_I2C_I2C1_USE_DMA
+       i2cp->rxdmamode |= STM32_DMA_CR_CHSEL(I2C1_RX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C1_DMA_PRIORITY);
+       i2cp->txdmamode |= STM32_DMA_CR_CHSEL(I2C1_TX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C1_DMA_PRIORITY);
++
++      /* I2C registers pointed by the DMA.*/
++      dmaStreamSetPeripheral(i2cp->dmarx, &dp->DR);
++      dmaStreamSetPeripheral(i2cp->dmatx, &dp->DR);
++#endif
++
++      /* Reset i2c peripheral.*/
++      dp->CR1 = I2C_CR1_SWRST;
++      dp->CR1 = 0;
++#if STM32_I2C_I2C1_USE_DMA
++      dp->CR2 = I2C_CR2_ITERREN | I2C_CR2_DMAEN;
++#else
++      dp->CR2 = I2C_CR2_ITERREN;
++#endif
+     }
+ #endif /* STM32_I2C_USE_I2C1 */
+ 
+ #if STM32_I2C_USE_I2C2
+     if (&I2CD2 == i2cp) {
++#if STM32_I2C_I2C2_USE_DMA
+       bool b;
+ 
++      i2cp->txdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_M2P;
++      i2cp->rxdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_P2M;
++#endif
++
+       rccResetI2C2();
++
++#if STM32_I2C_I2C2_USE_DMA
+       b = dmaStreamAllocate(i2cp->dmarx,
+                             STM32_I2C_I2C2_IRQ_PRIORITY,
+                             (stm32_dmaisr_t)i2c_lld_serve_rx_end_irq,
+@@ -590,22 +837,52 @@ void i2c_lld_start(I2CDriver *i2cp) {
+                             (stm32_dmaisr_t)i2c_lld_serve_tx_end_irq,
+                             (void *)i2cp);
+       osalDbgAssert(!b, "stream already allocated");
++#endif
++
+       rccEnableI2C2(true);
+       nvicEnableVector(I2C2_EV_IRQn, STM32_I2C_I2C2_IRQ_PRIORITY);
+       nvicEnableVector(I2C2_ER_IRQn, STM32_I2C_I2C2_IRQ_PRIORITY);
+ 
++#if STM32_I2C_I2C2_USE_DMA
+       i2cp->rxdmamode |= STM32_DMA_CR_CHSEL(I2C2_RX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C2_DMA_PRIORITY);
+       i2cp->txdmamode |= STM32_DMA_CR_CHSEL(I2C2_TX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C2_DMA_PRIORITY);
++
++      /* I2C registers pointed by the DMA.*/
++      dmaStreamSetPeripheral(i2cp->dmarx, &dp->DR);
++      dmaStreamSetPeripheral(i2cp->dmatx, &dp->DR);
++#endif
++
++      /* Reset i2c peripheral.*/
++      dp->CR1 = I2C_CR1_SWRST;
++      dp->CR1 = 0;
++#if STM32_I2C_I2C2_USE_DMA
++      dp->CR2 = I2C_CR2_ITERREN | I2C_CR2_DMAEN;
++#else
++      dp->CR2 = I2C_CR2_ITERREN;
++#endif
+     }
+ #endif /* STM32_I2C_USE_I2C2 */
+ 
+ #if STM32_I2C_USE_I2C3
+     if (&I2CD3 == i2cp) {
++#if STM32_I2C_I2C3_USE_DMA
+       bool b;
+ 
++      i2cp->txdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_M2P;
++      i2cp->rxdmamode = STM32_DMA_CR_PSIZE_BYTE | STM32_DMA_CR_MSIZE_BYTE |
++                        STM32_DMA_CR_MINC       | STM32_DMA_CR_DMEIE |
++                        STM32_DMA_CR_TEIE       | STM32_DMA_CR_TCIE |
++                        STM32_DMA_CR_DIR_P2M;
++#endif
++
+       rccResetI2C3();
++
++#if STM32_I2C_I2C3_USE_DMA
+       b = dmaStreamAllocate(i2cp->dmarx,
+                             STM32_I2C_I2C3_IRQ_PRIORITY,
+                             (stm32_dmaisr_t)i2c_lld_serve_rx_end_irq,
+@@ -616,27 +893,35 @@ void i2c_lld_start(I2CDriver *i2cp) {
+                             (stm32_dmaisr_t)i2c_lld_serve_tx_end_irq,
+                             (void *)i2cp);
+       osalDbgAssert(!b, "stream already allocated");
++#endif
++
+       rccEnableI2C3(true);
+       nvicEnableVector(I2C3_EV_IRQn, STM32_I2C_I2C3_IRQ_PRIORITY);
+       nvicEnableVector(I2C3_ER_IRQn, STM32_I2C_I2C3_IRQ_PRIORITY);
+ 
++#if STM32_I2C_I2C3_USE_DMA
+       i2cp->rxdmamode |= STM32_DMA_CR_CHSEL(I2C3_RX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C3_DMA_PRIORITY);
+       i2cp->txdmamode |= STM32_DMA_CR_CHSEL(I2C3_TX_DMA_CHANNEL) |
+                        STM32_DMA_CR_PL(STM32_I2C_I2C3_DMA_PRIORITY);
++
++      /* I2C registers pointed by the DMA.*/
++      dmaStreamSetPeripheral(i2cp->dmarx, &dp->DR);
++      dmaStreamSetPeripheral(i2cp->dmatx, &dp->DR);
++#endif
++
++      /* Reset i2c peripheral.*/
++      dp->CR1 = I2C_CR1_SWRST;
++      dp->CR1 = 0;
++#if STM32_I2C_I2C3_USE_DMA
++      dp->CR2 = I2C_CR2_ITERREN | I2C_CR2_DMAEN;
++#else
++      dp->CR2 = I2C_CR2_ITERREN;
++#endif
+     }
+ #endif /* STM32_I2C_USE_I2C3 */
+   }
+ 
+-  /* I2C registers pointed by the DMA.*/
+-  dmaStreamSetPeripheral(i2cp->dmarx, &dp->DR);
+-  dmaStreamSetPeripheral(i2cp->dmatx, &dp->DR);
+-
+-  /* Reset i2c peripheral.*/
+-  dp->CR1 = I2C_CR1_SWRST;
+-  dp->CR1 = 0;
+-  dp->CR2 = I2C_CR2_ITERREN | I2C_CR2_DMAEN;
+-
+   /* Setup I2C parameters.*/
+   i2c_lld_set_clock(i2cp);
+   i2c_lld_set_opmode(i2cp);
+@@ -659,11 +944,13 @@ void i2c_lld_stop(I2CDriver *i2cp) {
+ 
+     /* I2C disable.*/
+     i2c_lld_abort_operation(i2cp);
+-    dmaStreamRelease(i2cp->dmatx);
+-    dmaStreamRelease(i2cp->dmarx);
+ 
+ #if STM32_I2C_USE_I2C1
+     if (&I2CD1 == i2cp) {
++#if STM32_I2C_I2C1_USE_DMA
++      dmaStreamRelease(i2cp->dmatx);
++      dmaStreamRelease(i2cp->dmarx);
++ #endif
+       nvicDisableVector(I2C1_EV_IRQn);
+       nvicDisableVector(I2C1_ER_IRQn);
+       rccDisableI2C1();
+@@ -672,6 +959,10 @@ void i2c_lld_stop(I2CDriver *i2cp) {
+ 
+ #if STM32_I2C_USE_I2C2
+     if (&I2CD2 == i2cp) {
++#if STM32_I2C_I2C2_USE_DMA
++      dmaStreamRelease(i2cp->dmatx);
++      dmaStreamRelease(i2cp->dmarx);
++ #endif
+       nvicDisableVector(I2C2_EV_IRQn);
+       nvicDisableVector(I2C2_ER_IRQn);
+       rccDisableI2C2();
+@@ -680,6 +971,10 @@ void i2c_lld_stop(I2CDriver *i2cp) {
+ 
+ #if STM32_I2C_USE_I2C3
+     if (&I2CD3 == i2cp) {
++#if STM32_I2C_I2C3_USE_DMA
++      dmaStreamRelease(i2cp->dmatx);
++      dmaStreamRelease(i2cp->dmarx);
++ #endif
+       nvicDisableVector(I2C3_EV_IRQn);
+       nvicDisableVector(I2C3_ER_IRQn);
+       rccDisableI2C3();
+@@ -730,10 +1025,43 @@ msg_t i2c_lld_master_receive_timeout(I2CDriver *i2cp, i2caddr_t addr,
+   /* Releases the lock from high level driver.*/
+   osalSysUnlock();
+ 
+-  /* RX DMA setup.*/
+-  dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
+-  dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
+-  dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++  /* RX (DMA) setup.*/
++#if STM32_I2C_USE_I2C1
++  if (&I2CD1 == i2cp) {
++#if STM32_I2C_I2C1_USE_DMA
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
++#if STM32_I2C_USE_I2C2
++  if (&I2CD2 == i2cp) {
++#if STM32_I2C_I2C2_USE_DMA
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
++#if STM32_I2C_USE_I2C3
++  if (&I2CD3 == i2cp) {
++#if STM32_I2C_I2C3_USE_DMA
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
+ 
+   /* Calculating the time window for the timeout on the busy bus condition.*/
+   start = osalOsGetSystemTimeX();
+@@ -810,15 +1138,61 @@ msg_t i2c_lld_master_transmit_timeout(I2CDriver *i2cp, i2caddr_t addr,
+   /* Releases the lock from high level driver.*/
+   osalSysUnlock();
+ 
+-  /* TX DMA setup.*/
+-  dmaStreamSetMode(i2cp->dmatx, i2cp->txdmamode);
+-  dmaStreamSetMemory0(i2cp->dmatx, txbuf);
+-  dmaStreamSetTransactionSize(i2cp->dmatx, txbytes);
+-
+-  /* RX DMA setup.*/
+-  dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
+-  dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
+-  dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++  /* TX (DMA) and RX (DMA) setup */
++#if STM32_I2C_USE_I2C1
++  if (&I2CD1 == i2cp) {
++#if STM32_I2C_I2C1_USE_DMA
++    dmaStreamSetMode(i2cp->dmatx, i2cp->txdmamode);
++    dmaStreamSetMemory0(i2cp->dmatx, txbuf);
++    dmaStreamSetTransactionSize(i2cp->dmatx, txbytes);
++
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->txbuf = txbuf;
++    i2cp->txbytes = txbytes;
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
++#if STM32_I2C_USE_I2C2
++  if (&I2CD2 == i2cp) {
++#if STM32_I2C_I2C2_USE_DMA
++    dmaStreamSetMode(i2cp->dmatx, i2cp->txdmamode);
++    dmaStreamSetMemory0(i2cp->dmatx, txbuf);
++    dmaStreamSetTransactionSize(i2cp->dmatx, txbytes);
++
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->txbuf = txbuf;
++    i2cp->txbytes = txbytes;
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
++#if STM32_I2C_USE_I2C3
++  if (&I2CD3 == i2cp) {
++#if STM32_I2C_I2C3_USE_DMA
++    dmaStreamSetMode(i2cp->dmatx, i2cp->txdmamode);
++    dmaStreamSetMemory0(i2cp->dmatx, txbuf);
++    dmaStreamSetTransactionSize(i2cp->dmatx, txbytes);
++
++    dmaStreamSetMode(i2cp->dmarx, i2cp->rxdmamode);
++    dmaStreamSetMemory0(i2cp->dmarx, rxbuf);
++    dmaStreamSetTransactionSize(i2cp->dmarx, rxbytes);
++#else
++    i2cp->txbuf = txbuf;
++    i2cp->txbytes = txbytes;
++    i2cp->rxbuf = rxbuf;
++    i2cp->rxbytes = rxbytes;
++#endif
++  }
++#endif
+ 
+   /* Calculating the time window for the timeout on the busy bus condition.*/
+   start = osalOsGetSystemTimeX();
+diff --git a/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.h b/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.h
+index 1328d47..68f91e1 100644
+--- a/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.h
++++ b/os/hal/ports/STM32/LLD/I2Cv1/hal_i2c_lld.h
+@@ -104,6 +104,33 @@
+ #endif
+ 
+ /**
++ * @brief   I2C1 DMA enable switch.
++ * @details If set to @p TRUE the I2C1 driver will use DMA.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_I2C_I2C1_USE_DMA) || defined(__DOXYGEN__)
++#define STM32_I2C_I2C1_USE_DMA              TRUE
++#endif
++
++/**
++ * @brief   I2C2 DMA enable switch.
++ * @details If set to @p TRUE the I2C2 driver will use DMA.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_I2C_I2C2_USE_DMA) || defined(__DOXYGEN__)
++#define STM32_I2C_I2C2_USE_DMA              TRUE
++#endif
++
++/**
++ * @brief   I2C3 DMA enable switch.
++ * @details If set to @p TRUE the I2C3 driver will use DMA.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_I2C_I2C3_USE_DMA) || defined(__DOXYGEN__)
++#define STM32_I2C_I2C3_USE_DMA              TRUE
++#endif
++
++/**
+ * @brief   I2C1 DMA priority (0..3|lowest..highest).
+ * @note    The priority level is used for both the TX and RX DMA streams but
+ *          because of the streams ordering the RX stream has always priority
+@@ -250,16 +277,19 @@
+ #endif
+ 
+ #if STM32_I2C_USE_I2C1 &&                                                   \
++    STM32_I2C_I2C1_USE_DMA &&                                               \
+     !STM32_DMA_IS_VALID_PRIORITY(STM32_I2C_I2C1_DMA_PRIORITY)
+ #error "Invalid DMA priority assigned to I2C1"
+ #endif
+ 
+ #if STM32_I2C_USE_I2C2 &&                                                   \
++    STM32_I2C_I2C2_USE_DMA &&                                               \
+     !STM32_DMA_IS_VALID_PRIORITY(STM32_I2C_I2C2_DMA_PRIORITY)
+ #error "Invalid DMA priority assigned to I2C2"
+ #endif
+ 
+ #if STM32_I2C_USE_I2C3 &&                                                   \
++    STM32_I2C_I2C3_USE_DMA &&                                               \
+     !STM32_DMA_IS_VALID_PRIORITY(STM32_I2C_I2C3_DMA_PRIORITY)
+ #error "Invalid DMA priority assigned to I2C3"
+ #endif
+@@ -316,7 +346,10 @@
+ #endif
+ #endif /* STM32_ADVANCED_DMA */
+ 
+-#if !defined(STM32_DMA_REQUIRED)
++#if ((STM32_I2C_USE_I2C1 && STM32_I2C_I2C1_USE_DMA) ||                       \
++     (STM32_I2C_USE_I2C2 && STM32_I2C_I2C2_USE_DMA) ||                       \
++     (STM32_I2C_USE_I2C3 && STM32_I2C_I2C3_USE_DMA)) &&                      \
++    !defined(STM32_DMA_REQUIRED)
+ #define STM32_DMA_REQUIRED
+ #endif
+ 
+@@ -437,21 +470,52 @@ struct I2CDriver {
+    */
+   i2caddr_t                 addr;
+   /**
+-   * @brief RX DMA mode bit mask.
+-   */
+-  uint32_t                  rxdmamode;
+-  /**
+-   * @brief TX DMA mode bit mask.
+-   */
+-  uint32_t                  txdmamode;
+-  /**
+-   * @brief     Receive DMA channel.
+-   */
+-  const stm32_dma_stream_t  *dmarx;
+-  /**
+-   * @brief     Transmit DMA channel.
++   * @brief   Anonymous union to store transmission related data for either DMA or non-DMA mode.
+    */
+-  const stm32_dma_stream_t  *dmatx;
++  union {
++    /**
++     * @brief   Anonymous struct to store data for DMA mode.
++     */
++    struct {
++      /**
++       * @brief RX DMA mode bit mask.
++       */
++      uint32_t                  rxdmamode;
++      /**
++       * @brief TX DMA mode bit mask.
++       */
++      uint32_t                  txdmamode;
++      /**
++       * @brief     Receive DMA channel.
++       */
++      const stm32_dma_stream_t  *dmarx;
++      /**
++       * @brief     Transmit DMA channel.
++       */
++      const stm32_dma_stream_t  *dmatx;
++    };
++    /**
++     * @brief   Anonymous struct to store data for non-DMA mode.
++     */
++    struct {
++      /**
++       * @brief   Receive buffer.
++       */
++      uint8_t                   *rxbuf;
++      /**
++       * @brief   Size of the receive buffer.
++       */
++      size_t                    rxbytes;
++      /**
++       * @brief   Transmit buffer.
++       */
++      const uint8_t             *txbuf;
++      /**
++       * @brief   Size of the transmit buffer.
++       */
++      size_t                    txbytes;
++    };
++  };
+   /**
+    * @brief     Pointer to the I2Cx registers block.
+    */
+diff --git a/os/hal/ports/STM32/LLD/TIMv1/driver.mk b/os/hal/ports/STM32/LLD/TIMv1/driver.mk
+index 032d75a..13e3571 100644
+--- a/os/hal/ports/STM32/LLD/TIMv1/driver.mk
++++ b/os/hal/ports/STM32/LLD/TIMv1/driver.mk
+@@ -10,10 +10,14 @@ endif
+ ifneq ($(findstring HAL_USE_PWM TRUE,$(HALCONF)),)
+ PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_pwm_lld.c
+ endif
++ifneq ($(findstring HAL_USE_QEI TRUE,$(HALCONF)),)
++PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
++endif
+ else
+ PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_gpt_lld.c
+ PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_icu_lld.c
+ PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_pwm_lld.c
++PLATFORMSRC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
+ endif
+ 
+ PLATFORMINC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1
+diff --git a/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
+new file mode 100644
+index 0000000..700704a
+--- /dev/null
++++ b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
+@@ -0,0 +1,302 @@
++/*
++AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
++Copyright (C) 2016..2018  Thomas Schöpping et al.
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++/**
++ * @file    STM32/hal_qei_lld.c
++ * @brief   STM32 QEI subsystem low level driver.
++ *
++ * @addtogroup QEI
++ * @{
++ */
++
++#include "hal.h"
++
++#include "hal_qei.h"
++
++#if HAL_USE_QEI || defined(__DOXYGEN__)
++
++/*===========================================================================*/
++/* Driver exported variables.                                                */
++/*===========================================================================*/
++
++/**
++ * @brief   QEID1 driver identifier.
++ * @note    The driver QEID1 allocates the complex timer TIM1 when enabled.
++ */
++#if STM32_QEI_USE_TIM1 || defined(__DOXYGEN__)
++QEIDriver QEID1;
++#endif
++
++/**
++ * @brief   QEID2 driver identifier.
++ * @note    The driver QEID1 allocates the timer TIM2 when enabled.
++ */
++#if STM32_QEI_USE_TIM2 || defined(__DOXYGEN__)
++QEIDriver QEID2;
++#endif
++
++/**
++ * @brief   QEID3 driver identifier.
++ * @note    The driver QEID1 allocates the timer TIM3 when enabled.
++ */
++#if STM32_QEI_USE_TIM3 || defined(__DOXYGEN__)
++QEIDriver QEID3;
++#endif
++
++/**
++ * @brief   QEID4 driver identifier.
++ * @note    The driver QEID4 allocates the timer TIM4 when enabled.
++ */
++#if STM32_QEI_USE_TIM4 || defined(__DOXYGEN__)
++QEIDriver QEID4;
++#endif
++
++/**
++ * @brief   QEID5 driver identifier.
++ * @note    The driver QEID5 allocates the timer TIM5 when enabled.
++ */
++#if STM32_QEI_USE_TIM5 || defined(__DOXYGEN__)
++QEIDriver QEID5;
++#endif
++
++/**
++ * @brief   QEID8 driver identifier.
++ * @note    The driver QEID8 allocates the timer TIM8 when enabled.
++ */
++#if STM32_QEI_USE_TIM8 || defined(__DOXYGEN__)
++QEIDriver QEID8;
++#endif
++
++/*===========================================================================*/
++/* Driver local variables.                                                   */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver local functions.                                                   */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver interrupt handlers.                                                */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver exported functions.                                                */
++/*===========================================================================*/
++
++/**
++ * @brief   Low level QEI driver initialization.
++ *
++ * @notapi
++ */
++void qei_lld_init(void) {
++
++#if STM32_QEI_USE_TIM1
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID1);
++  QEID1.tim = STM32_TIM1;
++#endif
++
++#if STM32_QEI_USE_TIM2
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID2);
++  QEID2.tim = STM32_TIM2;
++#endif
++
++#if STM32_QEI_USE_TIM3
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID3);
++  QEID3.tim = STM32_TIM3;
++#endif
++
++#if STM32_QEI_USE_TIM4
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID4);
++  QEID4.tim = STM32_TIM4;
++#endif
++
++#if STM32_QEI_USE_TIM5
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID5);
++  QEID5.tim = STM32_TIM5;
++#endif
++
++#if STM32_QEI_USE_TIM8
++  /* Driver initialization.*/
++  qeiObjectInit(&QEID8);
++  QEID8.tim = STM32_TIM8;
++#endif
++}
++
++/**
++ * @brief   Configures and activates the QEI peripheral.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @notapi
++ */
++void qei_lld_start(QEIDriver *qeip) {
++  uint32_t arr, ccer;
++
++  if (qeip->state == QEI_STOP) {
++    /* Clock activation and timer reset.*/
++#if STM32_QEI_USE_TIM1
++    if (&QEID1 == qeip) {
++      rccEnableTIM1();
++      rccResetTIM1();
++    }
++#endif
++#if STM32_QEI_USE_TIM2
++    if (&QEID2 == qeip) {
++      rccEnableTIM2();
++      rccResetTIM2();
++    }
++#endif
++#if STM32_QEI_USE_TIM3
++    if (&QEID3 == qeip) {
++      rccEnableTIM3();
++      rccResetTIM3();
++    }
++#endif
++#if STM32_QEI_USE_TIM4
++    if (&QEID4 == qeip) {
++      rccEnableTIM4();
++      rccResetTIM4();
++    }
++#endif
++
++#if STM32_QEI_USE_TIM5
++    if (&QEID5 == qeip) {
++      rccEnableTIM5();
++      rccResetTIM5();
++    }
++#endif
++#if STM32_QEI_USE_TIM8
++    if (&QEID8 == qeip) {
++      rccEnableTIM8();
++      rccResetTIM8();
++    }
++#endif
++  }
++  else {
++    /* Driver re-configuration scenario, it must be stopped first.*/
++    qeip->tim->CR1    = 0;                  /* Timer disabled.              */
++    qeip->tim->DIER   = 0;                  /* All IRQs disabled.           */
++    qeip->tim->SR     = 0;                  /* Clear eventual pending IRQs. */
++    qeip->tim->CCR[0] = 0;                  /* Comparator 1 disabled.       */
++    qeip->tim->CCR[1] = 0;                  /* Comparator 2 disabled.       */
++    qeip->tim->CNT    = 0;                  /* Counter reset to zero.       */
++  }
++
++  /* Timer configuration.*/
++  qeip->tim->PSC  = 0;
++  arr = qeip->config->range - 1;
++  osalDbgAssert((arr <= 0xFFFF), "qei_lld_start(), #1" /*, "invalid range"*/);
++  qeip->tim->ARR  = arr & 0xFFFF;
++
++  /* CCMR1_CC1S = 01 - CH1 Input on TI1.
++     CCMR1_CC2S = 01 - CH2 Input on TI2.*/
++  qeip->tim->CCMR1 = TIM_CCMR1_CC1S_0 | TIM_CCMR1_CC2S_0;
++
++  ccer = 0;
++  if (qeip->config->channels[0].mode == QEI_INPUT_INVERTED)
++    ccer |= TIM_CCER_CC1P;
++  if (qeip->config->channels[1].mode == QEI_INPUT_INVERTED)
++    ccer |= TIM_CCER_CC2P;
++  qeip->tim->CCER = ccer;
++
++  if (qeip->config->mode == QEI_COUNT_CH1)
++    qeip->tim->SMCR  = TIM_SMCR_SMS_1;
++  else if (qeip->config->mode == QEI_COUNT_CH2)
++    qeip->tim->SMCR  = TIM_SMCR_SMS_0;
++  else
++    qeip->tim->SMCR  = TIM_SMCR_SMS_0 | TIM_SMCR_SMS_1;
++}
++
++/**
++ * @brief   Deactivates the QEI peripheral.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @notapi
++ */
++void qei_lld_stop(QEIDriver *qeip) {
++
++  if (qeip->state == QEI_READY) {
++    /* Clock deactivation.*/
++    qeip->tim->CR1  = 0;                    /* Timer disabled.              */
++
++#if STM32_QEI_USE_TIM1
++    if (&QEID1 == qeip) {
++      rccDisableTIM1();
++    }
++#endif
++#if STM32_QEI_USE_TIM2
++    if (&QEID2 == qeip) {
++      rccDisableTIM2();
++    }
++#endif
++#if STM32_QEI_USE_TIM3
++    if (&QEID3 == qeip) {
++      rccDisableTIM3();
++    }
++#endif
++#if STM32_QEI_USE_TIM4
++    if (&QEID4 == qeip) {
++      rccDisableTIM4();
++    }
++#endif
++#if STM32_QEI_USE_TIM5
++    if (&QEID5 == qeip) {
++      rccDisableTIM5();
++    }
++#endif
++  }
++#if STM32_QEI_USE_TIM8
++    if (&QEID8 == qeip) {
++      rccDisableTIM8();
++    }
++#endif
++}
++
++/**
++ * @brief   Enables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @notapi
++ */
++void qei_lld_enable(QEIDriver *qeip) {
++
++  qeip->tim->CR1  = TIM_CR1_CEN;
++}
++
++/**
++ * @brief   Disables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @notapi
++ */
++void qei_lld_disable(QEIDriver *qeip) {
++
++  qeip->tim->CR1  = 0;
++}
++
++#endif /* HAL_USE_QEI */
++
++/** @} */
+diff --git a/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h
+new file mode 100644
+index 0000000..d4b7acc
+--- /dev/null
++++ b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h
+@@ -0,0 +1,302 @@
++/*
++AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
++Copyright (C) 2016..2018  Thomas Schöpping et al.
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++/**
++ * @file    STM32/hal_qei_lld.h
++ * @brief   STM32 QEI subsystem low level driver header.
++ *
++ * @addtogroup QEI
++ * @{
++ */
++
++#ifndef _HAL_QEI_LLD_H_
++#define _HAL_QEI_LLD_H_
++
++#include "stm32_tim.h"
++
++#if HAL_USE_QEI || defined(__DOXYGEN__)
++
++/*===========================================================================*/
++/* Driver constants.                                                         */
++/*===========================================================================*/
++
++/**
++ * @brief   Number of input channels per QEI driver.
++ */
++#define QEI_CHANNELS                            2
++
++/*===========================================================================*/
++/* Driver pre-compile time settings.                                         */
++/*===========================================================================*/
++
++/**
++ * @name    Configuration options
++ * @{
++ */
++/**
++ * @brief   QEID1 driver enable switch.
++ * @details If set to @p TRUE the support for QEID1 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM1) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM1                  TRUE
++#endif
++
++/**
++ * @brief   QEID2 driver enable switch.
++ * @details If set to @p TRUE the support for QEID2 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM2) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM2                  TRUE
++#endif
++
++/**
++ * @brief   QEID3 driver enable switch.
++ * @details If set to @p TRUE the support for QEID3 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM3) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM3                  TRUE
++#endif
++
++/**
++ * @brief   QEID4 driver enable switch.
++ * @details If set to @p TRUE the support for QEID4 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM4) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM4                  TRUE
++#endif
++
++/**
++ * @brief   QEID5 driver enable switch.
++ * @details If set to @p TRUE the support for QEID5 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM5) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM5                  TRUE
++#endif
++
++/**
++ * @brief   QEID8 driver enable switch.
++ * @details If set to @p TRUE the support for QEID8 is included.
++ * @note    The default is @p TRUE.
++ */
++#if !defined(STM32_QEI_USE_TIM8) || defined(__DOXYGEN__)
++#define STM32_QEI_USE_TIM8                  TRUE
++#endif
++/** @} */
++
++/*===========================================================================*/
++/* Derived constants and error checks.                                       */
++/*===========================================================================*/
++
++#if STM32_QEI_USE_TIM1 && !STM32_HAS_TIM1
++#error "TIM1 not present in the selected device"
++#endif
++
++#if STM32_QEI_USE_TIM2 && !STM32_HAS_TIM2
++#error "TIM2 not present in the selected device"
++#endif
++
++#if STM32_QEI_USE_TIM3 && !STM32_HAS_TIM3
++#error "TIM3 not present in the selected device"
++#endif
++
++#if STM32_QEI_USE_TIM4 && !STM32_HAS_TIM4
++#error "TIM4 not present in the selected device"
++#endif
++
++#if STM32_QEI_USE_TIM5 && !STM32_HAS_TIM5
++#error "TIM5 not present in the selected device"
++#endif
++
++#if STM32_QEI_USE_TIM8 && !STM32_HAS_TIM8
++#error "TIM8 not present in the selected device"
++#endif
++
++#if !STM32_QEI_USE_TIM1 && !STM32_QEI_USE_TIM2 &&                           \
++    !STM32_QEI_USE_TIM3 && !STM32_QEI_USE_TIM4 &&                           \
++    !STM32_QEI_USE_TIM5 && !STM32_QEI_USE_TIM8
++#error "QEI driver activated but no TIM peripheral assigned"
++#endif
++
++/*===========================================================================*/
++/* Driver data structures and types.                                         */
++/*===========================================================================*/
++
++/**
++ * @brief QEI driver mode.
++ */
++typedef enum {
++  QEI_COUNT_BOTH = 0,
++  QEI_COUNT_CH1 = 1,
++  QEI_COUNT_CH2 = 2,
++} qeimode_t;
++
++/**
++ * @brief QEI input mode.
++ */
++typedef enum {
++  QEI_INPUT_NONINVERTED = 0, /**< Input channel noninverted.*/
++  QEI_INPUT_INVERTED = 1, /**< Input channel inverted.*/
++} qeiinputmode_t;
++
++/**
++ * @brief   QEI count type.
++ */
++typedef uint32_t qeicnt_t;
++
++/**
++ * @brief   Driver channel configuration structure.
++ */
++typedef struct {
++  /**
++   * @brief Channel input logic.
++   */
++  qeiinputmode_t                 mode;
++  /* End of the mandatory fields.*/
++} QEIChannelConfig;
++
++/**
++ * @brief   Driver configuration structure.
++ */
++typedef struct {
++  /**
++   * @brief   Driver mode.
++   */
++  qeimode_t                 mode;
++  /**
++   * @brief   Channels configurations.
++   */
++  QEIChannelConfig          channels[QEI_CHANNELS];
++  /**
++   * @brief   Range in pulses.
++   */
++  qeicnt_t                  range;
++  /* End of the mandatory fields.*/
++} QEIConfig;
++
++/**
++ * @brief   Structure representing an QEI driver.
++ */
++struct QEIDriver {
++  /**
++   * @brief Driver state.
++   */
++  qeistate_t                state;
++  /**
++   * @brief Current configuration data.
++   */
++  const QEIConfig           *config;
++#if defined(QEI_DRIVER_EXT_FIELDS)
++  QEI_DRIVER_EXT_FIELDS
++#endif
++  /* End of the mandatory fields.*/
++  /**
++   * @brief Pointer to the TIMx registers block.
++   */
++  stm32_tim_t               *tim;
++};
++
++/*===========================================================================*/
++/* Driver macros.                                                            */
++/*===========================================================================*/
++
++/**
++ * @brief   Returns the direction of the last transition.
++ * @details The direction is defined as boolean and is
++ *          calculated at each transition on any input.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The request direction.
++ * @retval FALSE        Position counted up.
++ * @retval TRUE         Position counted down.
++ *
++ * @iclass
++ */
++#define qei_lld_get_direction(qeip) !!((qeip)->tim->CR1 & TIM_CR1_DIR)
++
++/**
++ * @brief   Returns the position of the encoder.
++ * @details The position is defined as number of pulses since last reset.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The number of pulses.
++ *
++ * @iclass
++ */
++#define qei_lld_get_position(qeip) ((qeip)->tim->CNT)
++
++/**
++ * @brief   Returns the range of the encoder.
++ * @details The range is defined as number of maximum pulse count.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @return              The number of pulses.
++ *
++ * @iclass
++ */
++#define qei_lld_get_range(qeip) ((qeip)->tim->ARR + 1)
++
++/*===========================================================================*/
++/* External declarations.                                                    */
++/*===========================================================================*/
++
++#if STM32_QEI_USE_TIM1 && !defined(__DOXYGEN__)
++extern QEIDriver QEID1;
++#endif
++
++#if STM32_QEI_USE_TIM2 && !defined(__DOXYGEN__)
++extern QEIDriver QEID2;
++#endif
++
++#if STM32_QEI_USE_TIM3 && !defined(__DOXYGEN__)
++extern QEIDriver QEID3;
++#endif
++
++#if STM32_QEI_USE_TIM4 && !defined(__DOXYGEN__)
++extern QEIDriver QEID4;
++#endif
++
++#if STM32_QEI_USE_TIM5 && !defined(__DOXYGEN__)
++extern QEIDriver QEID5;
++#endif
++
++#if STM32_QEI_USE_TIM8 && !defined(__DOXYGEN__)
++extern QEIDriver QEID8;
++#endif
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++  void qei_lld_init(void);
++  void qei_lld_start(QEIDriver *qeip);
++  void qei_lld_stop(QEIDriver *qeip);
++  void qei_lld_enable(QEIDriver *qeip);
++  void qei_lld_disable(QEIDriver *qeip);
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* HAL_USE_QEI */
++
++#endif /* _HAL_QEI_LLD_H_ */
++
++/** @} */
+diff --git a/os/hal/src/hal_qei.c b/os/hal/src/hal_qei.c
+new file mode 100644
+index 0000000..c08d175
+--- /dev/null
++++ b/os/hal/src/hal_qei.c
+@@ -0,0 +1,156 @@
++/*
++AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
++Copyright (C) 2016..2018  Thomas Schöpping et al.
++
++This program is free software: you can redistribute it and/or modify
++it under the terms of the GNU General Public License as published by
++the Free Software Foundation, either version 3 of the License, or
++(at your option) any later version.
++
++This program is distributed in the hope that it will be useful,
++but WITHOUT ANY WARRANTY; without even the implied warranty of
++MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++GNU General Public License for more details.
++
++You should have received a copy of the GNU General Public License
++along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++/**
++ * @file    hal_qei.c
++ * @brief   QEI Driver code.
++ *
++ * @addtogroup QEI
++ * @{
++ */
++
++#include "hal.h"
++#include "hal_qei.h"
++
++#if HAL_USE_QEI || defined(__DOXYGEN__)
++
++/*===========================================================================*/
++/* Driver local definitions.                                                 */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver exported variables.                                                */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver local variables.                                                   */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver local functions.                                                   */
++/*===========================================================================*/
++
++/*===========================================================================*/
++/* Driver exported functions.                                                */
++/*===========================================================================*/
++
++/**
++ * @brief   QEI Driver initialization.
++ * @note    This function is implicitly invoked by @p halInit(), there is
++ *          no need to explicitly initialize the driver.
++ *
++ * @init
++ */
++void qeiInit(void) {
++
++  qei_lld_init();
++}
++
++/**
++ * @brief   Initializes the standard part of a @p QEIDriver structure.
++ *
++ * @param[out] qeip     pointer to the @p QEIDriver object
++ *
++ * @init
++ */
++void qeiObjectInit(QEIDriver *qeip) {
++
++  qeip->state  = QEI_STOP;
++  qeip->config = NULL;
++}
++
++/**
++ * @brief   Configures and activates the QEI peripheral.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ * @param[in] config    pointer to the @p QEIConfig object
++ *
++ * @api
++ */
++void qeiStart(QEIDriver *qeip, const QEIConfig *config) {
++
++  chDbgCheck((qeip != NULL) && (config != NULL) /*, "qeiStart"*/);
++
++  chSysLock();
++  chDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY),
++              "qeiStart(), #1" /*, "invalid state"*/);
++  qeip->config = config;
++  qei_lld_start(qeip);
++  qeip->state = QEI_READY;
++  chSysUnlock();
++}
++
++/**
++ * @brief   Deactivates the QEI peripheral.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @api
++ */
++void qeiStop(QEIDriver *qeip) {
++
++  chDbgCheck(qeip != NULL /*, "qeiStop"*/);
++
++  chSysLock();
++  chDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY),
++              "qeiStop(), #1" /*, "invalid state"*/);
++  qei_lld_stop(qeip);
++  qeip->state = QEI_STOP;
++  chSysUnlock();
++}
++
++/**
++ * @brief   Enables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @api
++ */
++void qeiEnable(QEIDriver *qeip) {
++
++  chDbgCheck(qeip != NULL /*, "qeiEnable"*/);
++
++  chSysLock();
++  chDbgAssert(qeip->state == QEI_READY, "qeiEnable(), #1" /*, "invalid state"*/);
++  qei_lld_enable(qeip);
++  qeip->state = QEI_ACTIVE;
++  chSysUnlock();
++}
++
++/**
++ * @brief   Disables the quadrature encoder.
++ *
++ * @param[in] qeip      pointer to the @p QEIDriver object
++ *
++ * @api
++ */
++void qeiDisable(QEIDriver *qeip) {
++
++  chDbgCheck(qeip != NULL /*, "qeiDisable"*/);
++
++  chSysLock();
++  chDbgAssert((qeip->state == QEI_READY) || (qeip->state == QEI_ACTIVE),
++              "qeiDisable(), #1" /*, "invalid state"*/);
++  qei_lld_disable(qeip);
++  qeip->state = QEI_READY;
++  chSysUnlock();
++}
++
++#endif /* HAL_USE_QEI */
++
++/** @} */
