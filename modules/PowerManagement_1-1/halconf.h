@@ -127,6 +127,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 /**
+ * @brief   Enables the QEI subsystem.
+ */
+#if !defined(HAL_USE_QEI) || defined(__DOXYGEN__)
+#define HAL_USE_QEI                         FALSE
+#endif
+
+/**
  * @brief   Enables the QSPI subsystem.
  */
 #if !defined(HAL_USE_QSPI) || defined(__DOXYGEN__)

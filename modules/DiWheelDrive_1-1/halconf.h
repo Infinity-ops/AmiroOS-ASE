@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   HAL configuration header for the DiWheelDrive v1.1 module.
  * @details HAL configuration file, this file allows to enable or disable the
  *          various device drivers from your application. You may also use
@@ -124,6 +124,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #if !defined(HAL_USE_PWM) || defined(__DOXYGEN__)
 #define HAL_USE_PWM                         TRUE
+#endif
+
+/**
+ * @brief   Enables the QEI subsystem.
+ */
+#if !defined(HAL_USE_QEI) || defined(__DOXYGEN__)
+#define HAL_USE_QEI                         TRUE
 #endif
 
 /**

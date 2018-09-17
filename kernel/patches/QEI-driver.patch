@@ -1,9 +1,3 @@
-commit a23878ddb85bb8fd069f02042f15ad4be2a0d709
-Author: Marc Rothmann <mrothmann@techfak.uni-bielefeld.de>
-Date:   Mon Sep 17 11:40:39 2018 +0200
-
-    Added QEI driver to HAL.
-
 diff --git a/os/hal/hal.mk b/os/hal/hal.mk
 index f177a3f..64d96d9 100644
 --- a/os/hal/hal.mk
@@ -26,9 +20,32 @@ index f177a3f..64d96d9 100644
           $(CHIBIOS)/os/hal/src/hal_mac.c \
           $(CHIBIOS)/os/hal/src/hal_mmc_spi.c \
           $(CHIBIOS)/os/hal/src/hal_pal.c \
+diff --git a/os/hal/include/hal.h b/os/hal/include/hal.h
+index 79f7c42..8cf221f 100644
+--- a/os/hal/include/hal.h
++++ b/os/hal/include/hal.h
+@@ -78,6 +78,10 @@
+ #define HAL_USE_PWM                         FALSE
+ #endif
+ 
++#if !defined(HAL_USE_QEI)
++#define HAL_USE_QEI                         FALSE
++#endif
++
+ #if !defined(HAL_USE_QSPI)
+ #define HAL_USE_QSPI                        FALSE
+ #endif
+@@ -138,6 +142,7 @@
+ #include "hal_icu.h"
+ #include "hal_mac.h"
+ #include "hal_pwm.h"
++#include "hal_qei.h"
+ #include "hal_qspi.h"
+ #include "hal_rtc.h"
+ #include "hal_serial.h"
 diff --git a/os/hal/include/hal_qei.h b/os/hal/include/hal_qei.h
 new file mode 100644
-index 0000000..aef5e62
+index 0000000..8769729
 --- /dev/null
 +++ b/os/hal/include/hal_qei.h
 @@ -0,0 +1,148 @@
@@ -58,10 +75,10 @@ index 0000000..aef5e62
 + * @{
 + */
 +
-+#ifndef _HAL_QEI_H_
-+#define _HAL_QEI_H_
++#ifndef HAL_QEI_H
++#define HAL_QEI_H
 +
-+#if HAL_USE_QEI || defined(__DOXYGEN__)
++#if (HAL_USE_QEI == TRUE) || defined(__DOXYGEN__)
 +
 +/*===========================================================================*/
 +/* Driver constants.                                                         */
@@ -177,7 +194,7 @@ index 0000000..aef5e62
 +
 +#endif /* HAL_USE_QEI */
 +
-+#endif /* _HAL_QEI_H_ */
++#endif /* HAL_QEI_H */
 +
 +/** @} */
 diff --git a/os/hal/ports/STM32/LLD/TIMv1/driver.mk b/os/hal/ports/STM32/LLD/TIMv1/driver.mk
@@ -201,10 +218,10 @@ index 032d75a..13e3571 100644
  PLATFORMINC += $(CHIBIOS)/os/hal/ports/STM32/LLD/TIMv1
 diff --git a/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
 new file mode 100644
-index 0000000..700704a
+index 0000000..cd1ab9b
 --- /dev/null
 +++ b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.c
-@@ -0,0 +1,302 @@
+@@ -0,0 +1,304 @@
 +/*
 +AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
 +Copyright (C) 2016..2018  Thomas Schöpping et al.
@@ -233,9 +250,11 @@ index 0000000..700704a
 +
 +#include "hal.h"
 +
-+#include "hal_qei.h"
++#if (HAL_USE_QEI == TRUE) || defined(__DOXYGEN__)
 +
-+#if HAL_USE_QEI || defined(__DOXYGEN__)
++/*===========================================================================*/
++/* Driver local definitions.                                                 */
++/*===========================================================================*/
 +
 +/*===========================================================================*/
 +/* Driver exported variables.                                                */
@@ -290,7 +309,7 @@ index 0000000..700704a
 +#endif
 +
 +/*===========================================================================*/
-+/* Driver local variables.                                                   */
++/* Driver local variables and types.                                         */
 +/*===========================================================================*/
 +
 +/*===========================================================================*/
@@ -412,7 +431,7 @@ index 0000000..700704a
 +  /* Timer configuration.*/
 +  qeip->tim->PSC  = 0;
 +  arr = qeip->config->range - 1;
-+  osalDbgAssert((arr <= 0xFFFF), "qei_lld_start(), #1" /*, "invalid range"*/);
++  osalDbgAssert((arr <= 0xFFFF), "invalid range");
 +  qeip->tim->ARR  = arr & 0xFFFF;
 +
 +  /* CCMR1_CC1S = 01 - CH1 Input on TI1.
@@ -509,7 +528,7 @@ index 0000000..700704a
 +/** @} */
 diff --git a/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h
 new file mode 100644
-index 0000000..d4b7acc
+index 0000000..ec1cd42
 --- /dev/null
 +++ b/os/hal/ports/STM32/LLD/TIMv1/hal_qei_lld.h
 @@ -0,0 +1,302 @@
@@ -539,12 +558,12 @@ index 0000000..d4b7acc
 + * @{
 + */
 +
-+#ifndef _HAL_QEI_LLD_H_
-+#define _HAL_QEI_LLD_H_
++#ifndef HAL_QEI_LLD_H
++#define HAL_QEI_LLD_H
++
++#if (HAL_USE_QEI == TRUE) || defined(__DOXYGEN__)
 +
 +#include "stm32_tim.h"
-+
-+#if HAL_USE_QEI || defined(__DOXYGEN__)
 +
 +/*===========================================================================*/
 +/* Driver constants.                                                         */
@@ -569,7 +588,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM1) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM1                  TRUE
++#define STM32_QEI_USE_TIM1                  FALSE
 +#endif
 +
 +/**
@@ -578,7 +597,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM2) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM2                  TRUE
++#define STM32_QEI_USE_TIM2                  FALSE
 +#endif
 +
 +/**
@@ -587,7 +606,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM3) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM3                  TRUE
++#define STM32_QEI_USE_TIM3                  FALSE
 +#endif
 +
 +/**
@@ -596,7 +615,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM4) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM4                  TRUE
++#define STM32_QEI_USE_TIM4                  FALSE
 +#endif
 +
 +/**
@@ -605,7 +624,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM5) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM5                  TRUE
++#define STM32_QEI_USE_TIM5                  FALSE
 +#endif
 +
 +/**
@@ -614,7 +633,7 @@ index 0000000..d4b7acc
 + * @note    The default is @p TRUE.
 + */
 +#if !defined(STM32_QEI_USE_TIM8) || defined(__DOXYGEN__)
-+#define STM32_QEI_USE_TIM8                  TRUE
++#define STM32_QEI_USE_TIM8                  FALSE
 +#endif
 +/** @} */
 +
@@ -812,15 +831,15 @@ index 0000000..d4b7acc
 +
 +#endif /* HAL_USE_QEI */
 +
-+#endif /* _HAL_QEI_LLD_H_ */
++#endif /* HAL_QEI_LLD_H */
 +
 +/** @} */
 diff --git a/os/hal/src/hal_qei.c b/os/hal/src/hal_qei.c
 new file mode 100644
-index 0000000..c08d175
+index 0000000..00334bb
 --- /dev/null
 +++ b/os/hal/src/hal_qei.c
-@@ -0,0 +1,156 @@
+@@ -0,0 +1,152 @@
 +/*
 +AMiRo-OS is an operating system designed for the Autonomous Mini Robot (AMiRo) platform.
 +Copyright (C) 2016..2018  Thomas Schöpping et al.
@@ -848,9 +867,8 @@ index 0000000..c08d175
 + */
 +
 +#include "hal.h"
-+#include "hal_qei.h"
 +
-+#if HAL_USE_QEI || defined(__DOXYGEN__)
++#if (HAL_USE_QEI == TRUE) || defined(__DOXYGEN__)
 +
 +/*===========================================================================*/
 +/* Driver local definitions.                                                 */
@@ -907,15 +925,14 @@ index 0000000..c08d175
 + */
 +void qeiStart(QEIDriver *qeip, const QEIConfig *config) {
 +
-+  chDbgCheck((qeip != NULL) && (config != NULL) /*, "qeiStart"*/);
++  osalDbgCheck((qeip != NULL) && (config != NULL));
 +
-+  chSysLock();
-+  chDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY),
-+              "qeiStart(), #1" /*, "invalid state"*/);
++  osalSysLock();
++  osalDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY), "invalid state");
 +  qeip->config = config;
 +  qei_lld_start(qeip);
 +  qeip->state = QEI_READY;
-+  chSysUnlock();
++  osalSysUnlock();
 +}
 +
 +/**
@@ -927,14 +944,13 @@ index 0000000..c08d175
 + */
 +void qeiStop(QEIDriver *qeip) {
 +
-+  chDbgCheck(qeip != NULL /*, "qeiStop"*/);
++  osalDbgCheck(qeip != NULL);
 +
-+  chSysLock();
-+  chDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY),
-+              "qeiStop(), #1" /*, "invalid state"*/);
++  osalSysLock();
++  osalDbgAssert((qeip->state == QEI_STOP) || (qeip->state == QEI_READY), "invalid state");
 +  qei_lld_stop(qeip);
 +  qeip->state = QEI_STOP;
-+  chSysUnlock();
++  osalSysUnlock();
 +}
 +
 +/**
@@ -946,13 +962,13 @@ index 0000000..c08d175
 + */
 +void qeiEnable(QEIDriver *qeip) {
 +
-+  chDbgCheck(qeip != NULL /*, "qeiEnable"*/);
++  osalDbgCheck(qeip != NULL);
 +
-+  chSysLock();
-+  chDbgAssert(qeip->state == QEI_READY, "qeiEnable(), #1" /*, "invalid state"*/);
++  osalSysLock();
++  osalDbgAssert(qeip->state == QEI_READY, "invalid state");
 +  qei_lld_enable(qeip);
 +  qeip->state = QEI_ACTIVE;
-+  chSysUnlock();
++  osalSysUnlock();
 +}
 +
 +/**
@@ -964,14 +980,13 @@ index 0000000..c08d175
 + */
 +void qeiDisable(QEIDriver *qeip) {
 +
-+  chDbgCheck(qeip != NULL /*, "qeiDisable"*/);
++  osalDbgCheck(qeip != NULL);
 +
-+  chSysLock();
-+  chDbgAssert((qeip->state == QEI_READY) || (qeip->state == QEI_ACTIVE),
-+              "qeiDisable(), #1" /*, "invalid state"*/);
++  osalSysLock();
++  osalDbgAssert((qeip->state == QEI_READY) || (qeip->state == QEI_ACTIVE), "invalid state");
 +  qei_lld_disable(qeip);
 +  qeip->state = QEI_READY;
-+  chSysUnlock();
++  osalSysUnlock();
 +}
 +
 +#endif /* HAL_USE_QEI */
