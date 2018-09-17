@@ -59,20 +59,24 @@ static void gpio_init(stm32_gpio_t *gpiop,
                       const uint32_t afrh,
                       const uint16_t ignmask) {
 
-  uint32_t ignmask2 = 0;
-  uint32_t ignmask4_low = 0;
-  uint32_t ignmask4_high = 0;
-
-  /* some bit-magic to fan out the mask */
   const uint8_t lut[] = {0x00, 0x03, 0x0C, 0x0F,
                          0x30, 0x33, 0x3C, 0x3F,
                          0xC0, 0xC3, 0xCC, 0xCF,
                          0xF0, 0xF3, 0xFC, 0xFF};
-  for (uint8_t i = 0; i < 4; ++i) {
-    ignmask2 |= lut[(ignmask >> 4*i) & 0x0F] << (8*i);
-    ignmask4_low |= lut[lut[(ignmask >> 2*i) & 0x03]] << (8*i);
-    ignmask4_high |= lut[lut[(ignmask >> (8 + 2*i)) & 0x03]] << (8*i);
-  }
+
+  /* some bit-magic to fan out the mask */
+  const uint32_t ignmask2 = (lut[(ignmask >> 12)       ] << 24) |
+                            (lut[(ignmask >>  8) & 0x0F] << 16) |
+                            (lut[(ignmask >>  4) & 0x0F] <<  8) |
+                            (lut[(ignmask      ) & 0x0F]);
+  const uint32_t ignmask4_low = (lut[lut[(ignmask >> 6) & 0x03]] << 24) |
+                                (lut[lut[(ignmask >> 4) & 0x03]] << 16) |
+                                (lut[lut[(ignmask >> 2) & 0x03]] <<  8) |
+                                (lut[lut[(ignmask     ) & 0x03]]);
+  const uint32_t ignmask4_high = (lut[lut[(ignmask >> 14)       ]] << 24) |
+                                 (lut[lut[(ignmask >> 12) & 0x03]] << 16) |
+                                 (lut[lut[(ignmask >> 10) & 0x03]] <<  8) |
+                                 (lut[lut[(ignmask >>  8) & 0x03]]);
 
   gpiop->OTYPER  = (gpiop->OTYPER  & ignmask      ) | (otyper  & ~ignmask      );
   gpiop->OSPEEDR = (gpiop->OSPEEDR & ignmask2     ) | (ospeedr & ~ignmask2     );
