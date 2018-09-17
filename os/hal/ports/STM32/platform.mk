@@ -27,8 +27,8 @@
 PLATFORM_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # add include path
-PLATFORMINC += $(PLATFORM_DIR)LLD/QEIv1
+PLATFORMINC += 
 
 # add C sources
-PLATFORMSRC += $(PLATFORM_DIR)LLD/QEIv1/hal_qei_lld.c
+PLATFORMSRC += 
 

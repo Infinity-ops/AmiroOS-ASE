@@ -30,5 +30,5 @@ HAL_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
 HALINC += $(HAL_DIR)include
 
 # add sources
-HALSRC += $(HAL_DIR)src/hal_qei.c
+HALSRC += 
 
