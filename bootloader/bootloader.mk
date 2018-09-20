@@ -35,7 +35,19 @@ include $(BOOTLOADER_DIR)AMiRo-BLT/Target/Modules/moduleids.mk
 ifeq ($(OS),Windows_NT)
 	FLASH_PORT ?= COM4
 else
-	FLASH_PORT ?= /dev/ttyUSB0
+	# check whether /dev/ttyAMiRo0 exists
+	ifeq (,$(wildcard /dev/ttyAMiRo0))
+		# check whether /dev/ttyUSB0 exists
+		ifeq (,$(wildcard /dev/ttyUSB0))
+			# set to /dev/ttyAMiRo0 for meaningful error message
+			FLASH_PORT ?= /dev/ttyAMiRo0
+		else
+			# legacy support
+			FLASH_PORT ?= /dev/ttyUSB0
+		endif
+	else
+		FLASH_PORT ?= /dev/ttyAMiRo0
+	endif
 endif
 FLASH_BAUDRATE ?= 115200
 
