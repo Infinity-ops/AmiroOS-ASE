@@ -782,8 +782,8 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./dox \
-                         ../os/core/inc \
-                         ../os/core/src \
+                         ../core/inc \
+                         ../core/src \
                          ../modules/DiWheelDrive_1-1 \
                          ../modules/PowerManagement_1-1 \
                          ../modules/LightRing_1-0 \
@@ -796,7 +796,8 @@ INPUT                  = ./dox \
                          ../kernel/ChibiOS/os/rt/include \
                          ../kernel/ChibiOS/os/common/oslib/dox \
                          ../kernel/ChibiOS/os/common/oslib/src \
-                         ../kernel/ChibiOS/os/common/oslib/include
+                         ../kernel/ChibiOS/os/common/oslib/include \
+                         ../bootloader/AMiRo-BLT/Target/Source/AMiRo/amiroblt.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
