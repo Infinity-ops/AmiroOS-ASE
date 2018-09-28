@@ -343,7 +343,11 @@ static inline apalExitStatus_t apalI2CMasterTransmit(apalI2CDriver_t* i2cd, cons
   aosDbgCheck(i2cd != NULL);
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
-  i2cAcquireBus(i2cd);
+  // check whether the I2C driver was locked externally
+  const bool i2cd_locked_external = i2cd->mutex.owner == currp;
+  if (!i2cd_locked_external) {
+    i2cAcquireBus(i2cd);
+  }
 #endif
 
 #pragma GCC diagnostic push
@@ -364,7 +368,9 @@ static inline apalExitStatus_t apalI2CMasterTransmit(apalI2CDriver_t* i2cd, cons
 #pragma GCC diagnostic pop
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
-  i2cReleaseBus(i2cd);
+  if (!i2cd_locked_external) {
+    i2cReleaseBus(i2cd);
+  }
 #endif
 
   switch (status)
@@ -399,7 +405,11 @@ static inline apalExitStatus_t apalI2CMasterReceive(apalI2CDriver_t* i2cd, const
   aosDbgCheck(i2cd != NULL);
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
-  i2cAcquireBus(i2cd);
+  // check whether the I2C driver was locked externally
+  const bool i2cd_locked_external = i2cd->mutex.owner == currp;
+  if (!i2cd_locked_external) {
+    i2cAcquireBus(i2cd);
+  }
 #endif
 
 #pragma GCC diagnostic push
@@ -420,7 +430,9 @@ static inline apalExitStatus_t apalI2CMasterReceive(apalI2CDriver_t* i2cd, const
 #pragma GCC diagnostic pop
 
 #if (I2C_USE_MUTUAL_EXCLUSION == TRUE)
-  i2cReleaseBus(i2cd);
+  if (!i2cd_locked_external) {
+    i2cReleaseBus(i2cd);
+  }
 #endif
 
   switch (status)
@@ -467,13 +479,21 @@ static inline apalExitStatus_t apalSPIExchange(apalSPIDriver_t* spid, const uint
   aosDbgCheck(spid != NULL);
 
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiAcquireBus(spid);
+  // check whether the SPI driver was locked externally
+  const bool spid_locked_external = spid->mutex.owner == currp;
+  if (!spid_locked_external) {
+    spiAcquireBus(spid);
+  }
 #endif
+
   spiSelect(spid);
   spiExchange(spid, length, txData, rxData);
   spiUnselect(spid);
+
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiReleaseBus(spid);
+  if (!spid_locked_external) {
+    spiReleaseBus(spid);
+  }
 #endif
 
   return APAL_STATUS_OK;
@@ -493,13 +513,21 @@ static inline apalExitStatus_t apalSPIReceive(apalSPIDriver_t* spid, uint8_t* co
   aosDbgCheck(spid != NULL);
 
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiAcquireBus(spid);
+  // check whether the SPI driver was locked externally
+  const bool spid_locked_external = spid->mutex.owner == currp;
+  if (!spid_locked_external) {
+    spiAcquireBus(spid);
+  }
 #endif
+
   spiSelect(spid);
   spiReceive(spid, length, data);
   spiUnselect(spid);
+
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiReleaseBus(spid);
+  if (!spid_locked_external) {
+    spiReleaseBus(spid);
+  }
 #endif
 
   return APAL_STATUS_OK;
@@ -519,13 +547,21 @@ static inline apalExitStatus_t apalSPITransmit(apalSPIDriver_t* spid, const uint
   aosDbgCheck(spid != NULL);
 
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiAcquireBus(spid);
+  // check whether the SPI driver was locked externally
+  const bool spid_locked_external = spid->mutex.owner == currp;
+  if (!spid_locked_external) {
+    spiAcquireBus(spid);
+  }
 #endif
+
   spiSelect(spid);
   spiSend(spid, length, data);
   spiUnselect(spid);
+
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiReleaseBus(spid);
+  if (!spid_locked_external) {
+    spiReleaseBus(spid);
+  }
 #endif
 
   return APAL_STATUS_OK;
@@ -547,14 +583,22 @@ static inline apalExitStatus_t apalSPITransmitAndReceive(apalSPIDriver_t* spid, 
   aosDbgCheck(spid != NULL);
 
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiAcquireBus(spid);
+  // check whether the SPI driver was locked externally
+  const bool spid_locked_external = spid->mutex.owner == currp;
+  if (!spid_locked_external) {
+    spiAcquireBus(spid);
+  }
 #endif
+
   spiSelect(spid);
   spiSend(spid, txLength, txData);
   spiReceive(spid, rxLength, rxData);
   spiUnselect(spid);
+
 #if (SPI_USE_MUTUAL_EXCLUSION)
-  spiReleaseBus(spid);
+  if (!spid_locked_external) {
+    spiReleaseBus(spid);
+  }
 #endif
 
   return APAL_STATUS_OK;
