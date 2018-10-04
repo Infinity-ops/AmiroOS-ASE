@@ -1404,7 +1404,7 @@ void aosShellChannelOutputDisable(AosShellChannel* channel)
  * @param[in] aosShellThread    Name of the function;
  * @param[in] shell             Pointer to the shell object.
  */
-THD_FUNCTION(aosShellThread, shell)
+void aosShellThread(void* shell)
 {
   aosDbgCheck(shell != NULL);
 
