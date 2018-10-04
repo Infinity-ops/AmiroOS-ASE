@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   HAL configuration header for the LightRing v1.0 module.
  * @details HAL configuration file, this file allows to enable or disable the
  *          various device drivers from your application. You may also use

@@ -27,7 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*===========================================================================*/
 
-
 /** @} */
 
 /*===========================================================================*/
@@ -64,12 +63,12 @@ SPIConfig moduleHalSpiLightConfig = {
   /* CR2                         */ SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN,
 };
 
-SPIConfig moduleHalSpiUWBConfig = {
+SPIConfig moduleHalSpiWlConfig = {
   /* circular buffer mode        */ false,
   /* callback function pointer   */ NULL,
   /* chip select line port       */ GPIOB,
   /* chip select line pad number */ GPIOB_WL_SS_N,
-  /* CR1                         */ SPI_CR1_BR_0 | SPI_CR1_BR_1,
+  /* CR1                         */ SPI_CR1_BR_0,
   /* CR2                         */ SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN,
 };
 
@@ -143,8 +142,6 @@ apalControlGpio_t moduleGpioSysUartDn = {
     /* interrupt edge */ APAL_GPIO_EDGE_BOTH,
   },
 };
-
-//INFO WL_GDO2,WL_GDO0 /  -> UWB EXTI config.
 
 /**
  * @brief   WL_GDO2 input signal GPIO.
@@ -273,14 +270,6 @@ TPS2051BDriver moduleLldPowerSwitchLaser = {
   /* laser overcurrent GPIO */ &moduleGpioLaserOc,
 };
 
-
-DW1000Driver moduleLldDW1000 = {
-  /* SPI driver */ &MODULE_HAL_SPI_UWB,
-  /* EXTI GPIO  */ &_gpioWlGdo2,
-  /* RESET GPIO */ &_gpioWlGdo2,
-
-};
-
 /** @} */
 
 /*===========================================================================*/
@@ -353,26 +342,6 @@ aos_unittest_t moduleUtAlldTps2051bdbv = {
     /* next     */ NULL,
   },
   /* data           */ &moduleLldPowerSwitchLaser,
-};
-
-/* UWB Module */
-static int _utShellCmdCb_Dw1000(BaseSequentialStream* stream, int argc, char* argv[])
-{
-  (void)argc;
-  (void)argv;
-  aosUtRun(stream,&moduleUtAlldDw1000, NULL);
-  return AOS_OK;
-}
-aos_unittest_t moduleUtAlldDw1000 = {
-  /* info           */ "DW1000",
-  /* name           */ "UWB Module",
-  /* test function  */ utAlldDw1000Func,
-  /* shell command  */ {
-    /* name     */ "unittest:UWB",
-    /* callback */ _utShellCmdCb_Dw1000,
-    /* next     */ NULL,
-  },
-  /* data           */ &moduleLldDW1000,
 };
 
 #endif /* AMIROOS_CFG_TESTS_ENABLE == true */
