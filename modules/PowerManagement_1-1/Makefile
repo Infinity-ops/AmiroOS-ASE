@@ -118,7 +118,7 @@ PROJECT := $(patsubst $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))..
 # Imported source files and paths
 include ../../kernel/kernel.mk
 CHIBIOS := $(AMIROOS_KERNEL)
-AMIROOS = ../../
+AMIROOS = ../..
 # Startup files
 include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32f4xx.mk
 # HAL-OSAL files

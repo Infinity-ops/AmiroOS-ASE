@@ -140,7 +140,7 @@ Linux (available in the Ubuntu repositories), or 'hterm' for Windows. For
 gtkterm you need to modify the configuration file ~/.gtktermrc (generated
 automatically when you start the application for the first time) as follows:
 
-  port	= /dev/ttyUSB0
+  port	= /dev/ttyAMiRo0
   speed	= 115200
   bits	= 8
   stopbits	= 1
@@ -155,7 +155,8 @@ automatically when you start the application for the first time) as follows:
 
 For hterm you need to configure the tool analogously. With either tool the robot
 can be reset by toggling the RTS signal on and off again, and you can access the
-system shell of AMiRo-OS.
+system shell of AMiRo-OS. If you need legacy support for older version of
+AMiRo-BLT, you can replace the port value by '/dev/ttyUSB0'.
 
 
 2.2 - QtCreator IDE
