@@ -74,7 +74,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *          this value.
  */
 #if !defined(CH_CFG_ST_TIMEDELTA)
-#define CH_CFG_ST_TIMEDELTA                 20
+#define CH_CFG_ST_TIMEDELTA                 50
 #endif
 
 /** @} */
@@ -318,9 +318,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @note    The default is @p TRUE.
  */
-#if !defined(CH_CFG_USE_OBJ_FIFOS)
 #define CH_CFG_USE_OBJ_FIFOS                FALSE
-#endif
 
 /**
  * @brief   Dynamic Threads APIs.

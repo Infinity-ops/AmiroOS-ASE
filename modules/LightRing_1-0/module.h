@@ -26,8 +26,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 /*===========================================================================*/
 
-static void _alld_dw1000_callback(void* args);
-
 /** @} */
 
 /*===========================================================================*/
@@ -74,9 +72,9 @@ extern SerialConfig moduleHalProgIfConfig;
 #define MODULE_HAL_SPI_LIGHT                    SPID1
 
 /**
- * @brief   SPI interface driver for UWB Module.
+ * @brief   SPI interface driver for the wireless transceiver.
  */
-#define MODULE_HAL_SPI_UWB                      SPID2
+#define MODULE_HAL_SPI_WL                       SPID2
 
 /**
  * @brief   Configuration for the SPI interface driver to communicate with the LED driver.
@@ -84,9 +82,9 @@ extern SerialConfig moduleHalProgIfConfig;
 extern SPIConfig moduleHalSpiLightConfig;
 
 /**
- * @brief   Configuration for the SPI interface driver to communicate with the LED driver.
+ * @brief   Configuration for the SPI interface driver to communicate with the wireless transceiver.
  */
-extern SPIConfig moduleHalSpiUWBConfig;
+extern SPIConfig moduleHalSpiWlConfig;
 
 /**
  * @brief   Real-Time Clock driver.
@@ -194,9 +192,6 @@ extern apalControlGpio_t moduleGpioSysSync;
 extern const char* moduleShellPrompt;
 #endif
 
-
-
-
 /**
  * @brief   Interrupt initialization macro.
  * @note    SSSP related interrupt signals are already initialized in 'aos_system.c'.
@@ -206,10 +201,10 @@ extern const char* moduleShellPrompt;
   palSetPadCallback(moduleGpioLaserOc.gpio->port, moduleGpioLaserOc.gpio->pad, _intCallback, &moduleGpioLaserOc.gpio->pad); \
   palEnablePadEvent(moduleGpioLaserOc.gpio->port, moduleGpioLaserOc.gpio->pad, APAL2CH_EDGE(moduleGpioLaserOc.meta.edge));  \
   /* WL_GDO2 */                                                               \
-  palSetPadCallback(moduleGpioWlGdo2.gpio->port, moduleGpioWlGdo2.gpio->pad, _alld_dw1000_callback, &moduleGpioWlGdo2.gpio->pad);  \
+  palSetPadCallback(moduleGpioWlGdo2.gpio->port, moduleGpioWlGdo2.gpio->pad, _intCallback, &moduleGpioWlGdo2.gpio->pad);  \
   palEnablePadEvent(moduleGpioWlGdo2.gpio->port, moduleGpioWlGdo2.gpio->pad, APAL2CH_EDGE(moduleGpioWlGdo2.meta.edge));   \
   /* WL_GDO0 */                                                               \
-  palSetPadCallback(moduleGpioWlGdo0.gpio->port, moduleGpioWlGdo0.gpio->pad, _alld_dw1000_callback, &moduleGpioWlGdo0.gpio->pad);  \
+  palSetPadCallback(moduleGpioWlGdo0.gpio->port, moduleGpioWlGdo0.gpio->pad, _intCallback, &moduleGpioWlGdo0.gpio->pad);  \
   /*palEnablePadEvent(moduleGpioWlGdo0.gpio->port, moduleGpioWlGdo0.gpio->pad, APAL2CH_EDGE(moduleGpioWlGdo0.meta.edge)); // this is broken for some reason*/   \
 }
 
@@ -221,7 +216,6 @@ extern const char* moduleShellPrompt;
   aosShellAddCommand(&aos.shell, &moduleUtAlldAt24c01bn.shellcmd);            \
   aosShellAddCommand(&aos.shell, &moduleUtAlldTlc5947.shellcmd);              \
   aosShellAddCommand(&aos.shell, &moduleUtAlldTps2051bdbv.shellcmd);          \
-  aosShellAddCommand(&aos.shell, &moduleUtAlldDw1000.shellcmd);                \
 }
 
 /**
@@ -236,7 +230,7 @@ extern const char* moduleShellPrompt;
   i2cStart(&MODULE_HAL_I2C_EEPROM, &moduleHalI2cEepromConfig);                \
   /* SPI */                                                                   \
   spiStart(&MODULE_HAL_SPI_LIGHT, &moduleHalSpiLightConfig);                  \
-  spiStart(&MODULE_HAL_SPI_UWB, &moduleHalSpiUWBConfig);                      \
+  spiStart(&MODULE_HAL_SPI_WL, &moduleHalSpiWlConfig);                        \
 }
 
 /**
@@ -245,7 +239,7 @@ extern const char* moduleShellPrompt;
 #define MODULE_SHUTDOWN_PERIPHERY_COMM() {                                    \
   /* SPI */                                                                   \
   spiStop(&MODULE_HAL_SPI_LIGHT);                                             \
-  spiStop(&MODULE_HAL_SPI_UWB);                                               \
+  spiStop(&MODULE_HAL_SPI_WL);                                                \
   /* I2C */                                                                   \
   i2cStop(&MODULE_HAL_I2C_EEPROM);                                            \
   /* don't stop the serial driver so messages can still be printed */         \
@@ -301,7 +295,6 @@ extern const char* moduleShellPrompt;
 #include <alld_at24c01bn-sh-b.h>
 #include <alld_tlc5947.h>
 #include <alld_tps2051bdbv.h>
-#include <alld_dw1000.h>
 
 /**
  * @brief   EEPROM driver.
@@ -317,43 +310,6 @@ extern TLC5947Driver moduleLldLedPwm;
  * @brief   Power switch driver for the laser supply power.
  */
 extern TPS2051BDriver moduleLldPowerSwitchLaser;
-
-/**
- * @brief   DW1000 driver for UWB.
- */
-extern DW1000Driver moduleLldDW1000;
-
-
-
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * Function: _alld_dw1000_callback()
- *
- * Low level abstract function to handle 'reset' adn 'irq' interrupt from DW1000
- * Expects arg to be of iopadid_t* type, used to distinguish between irq or reset signal
- */
-static void _alld_dw1000_callback(void* args) {
-
-    aosDbgCheck(true);
-
-
-    chSysLockFromISR();
-    if ((*(iopadid_t*) args) == moduleLldDW1000.gpio_reset->pad)
-    {
-        // dw1000 external indicate reset done
-    }
-    else if ((*(iopadid_t*) args) == moduleLldDW1000.gpio_exti->pad)
-    {
-        dwt_isr();
-    }
-    else
-    {
-        return;
-    }
-    chSysUnlockFromISR();
-
-}
-
 
 /** @} */
 
@@ -383,11 +339,6 @@ extern aos_unittest_t moduleUtAlldTlc5947;
  * @brief   Current-limited power switch (Laser output)
  */
 extern aos_unittest_t moduleUtAlldTps2051bdbv;
-
-/**
- * @brief   DW1000 unit test object.
- */
-extern aos_unittest_t moduleUtAlldDw1000;
 
 
 #endif /* AMIROOS_CFG_TESTS_ENABLE == true */
