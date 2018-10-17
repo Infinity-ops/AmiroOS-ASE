@@ -818,7 +818,11 @@ inline void aosSysStart(void)
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true)
   // start system shell thread
+#if (CH_CFG_USE_THREADHIERARCHY == TRUE)
+  aos.shell.thread = chThdCreateStatic(_shell_wa, sizeof(_shell_wa), AMIROOS_CFG_SHELL_THREADPRIO, aosShellThread, &aos.shell, &ch.mainthread);
+#else
   aos.shell.thread = chThdCreateStatic(_shell_wa, sizeof(_shell_wa), AMIROOS_CFG_SHELL_THREADPRIO, aosShellThread, &aos.shell);
+#endif
 #endif
 
   return;

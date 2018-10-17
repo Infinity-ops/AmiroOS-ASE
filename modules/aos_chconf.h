@@ -168,6 +168,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CH_CFG_USE_REGISTRY                 FALSE
 
 /**
+ * @brief   Thread hierarchy APIs.
+ * @details Id enabled then the thread hierarchy APIs are included in the kernel.
+ *
+ * @note    The default is @p FALSE.
+ */
+#define CH_CFG_USE_THREADHIERARCHY          TRUE
+
+/**
+ * @brief   Enable ordering of child lists.
+ * @details Children will be ordered by their priority (descending).
+ *          If sibliblings have identical priority, they are ordered by age (descending).
+ */
+#define CH_CFG_THREADHIERARCHY_ORDERED      TRUE
+
+/**
  * @brief   Threads synchronization APIs.
  * @details If enabled then the @p chThdWait() function is included in
  *          the kernel.
