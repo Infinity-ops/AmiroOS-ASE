@@ -26,6 +26,234 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <aos_thread.h>
 #include <alld_bq27500.h>
 
+// change saved unseal keys to test bruteforcing
+#ifdef BQ27500_UT_TEST_BRUTEFORCE
+
+#ifdef BQ27500_LLD_DEFAULT_UNSEAL_KEY0
+#undef BQ27500_LLD_DEFAULT_UNSEAL_KEY0
+#define BQ27500_LLD_DEFAULT_UNSEAL_KEY0 0x1234
+#endif
+
+#ifdef BQ27500_LLD_DEFAULT_UNSEAL_KEY1
+#undef BQ27500_LLD_DEFAULT_UNSEAL_KEY1
+#define BQ27500_LLD_DEFAULT_UNSEAL_KEY1 0x5678
+#endif
+
+#endif
+
+bq27500_lld_control_status_t _try_unseal(BQ27500Driver* driver, uint16_t key0, uint16_t key1, apalTime_t timeout) {
+  uint16_t dst;
+  bq27500_lld_control_status_t ctrl;
+  bq27500_lld_send_ctnl_data(driver, key1, timeout);
+  aosThdUSleep(1);
+  bq27500_lld_send_ctnl_data(driver, key0, timeout);
+  aosThdUSleep(1);
+  bq27500_lld_sub_command_call(driver, BQ27500_LLD_SUB_CMD_CONTROL_STATUS, timeout);
+  aosThdUSleep(1);
+  bq27500_lld_std_command(driver, BQ27500_LLD_STD_CMD_Control, &dst, timeout);
+  bq27500_lld_sub_command_read(driver, &ctrl.value, timeout);
+  return ctrl;
+}
+
+uint8_t _bruteforce_sealed_key_bitflips(BaseSequentialStream* stream, BQ27500Driver* driver, uint16_t key0, uint16_t key1, apalTime_t timeout) {
+  bq27500_lld_control_status_t ctrl;
+  uint16_t k0;
+  uint16_t k1 = key1;
+  for (uint8_t i = 0; i < 16; i++) {
+    k0 = key0 ^ (1 << i); // flip bit i
+    ctrl = _try_unseal(driver, k0, k1, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+      return 1;
+    }
+  }
+  k0 = key0;
+  for (uint8_t i = 0; i < 16; i++) {
+    k1 = key1 ^ (1 << i); // flip bit i
+    ctrl = _try_unseal(driver, k0, k1, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+void _bruteforce_sealed_key(BaseSequentialStream* stream, BQ27500Driver* driver, apalTime_t timeout) {
+  chprintf(stream, "start bruteforcing sealed keys...\n");
+  bq27500_lld_control_status_t ctrl;
+  uint16_t key0_reversed = 0x7236;
+  uint16_t key1_reversed = 0x1404;
+  uint16_t key0 = BQ27500_LLD_DEFAULT_UNSEAL_KEY0;
+  uint16_t key1 = BQ27500_LLD_DEFAULT_UNSEAL_KEY1;
+  uint16_t k0 = key0;
+  uint16_t k1 = key1;
+
+  // testing default keys in different orders
+  chprintf(stream, "\ttry reversed byte order and different key order...\n");
+  // default unseal keys
+  ctrl = _try_unseal(driver, k0, k1, timeout);
+  if (ctrl.content.ss == 0x0) {
+    chprintf(stream, "\t\tSUCCESS!\n");
+    chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+    return;
+  }
+  // default unseal keys in reversed order
+  ctrl = _try_unseal(driver, k1, k0, timeout);
+  if (ctrl.content.ss == 0x0) {
+    chprintf(stream, "\t\tSUCCESS!\n");
+    chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+    return;
+  }
+  // byte reversed keys
+  k0 = key0_reversed;
+  k1 = key1_reversed;
+  ctrl = _try_unseal(driver, k0, k1, timeout);
+  if (ctrl.content.ss == 0x0) {
+    chprintf(stream, "\t\tSUCCESS!\n");
+    chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+    return;
+  }
+  // byte reversed keys in reversed order
+  ctrl = _try_unseal(driver, k1, k0, timeout);
+  if (ctrl.content.ss == 0x0) {
+    chprintf(stream, "\t\tSUCCESS!\n");
+    chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", k0, k1);
+    return;
+  }
+  chprintf(stream, "\t\tfailed\n");
+
+
+  // testing single bit flips of the default keys in different orders
+  chprintf(stream, "\ttry single bit flips of default keys...\n");
+  // default unseal keys
+  uint8_t result = 0;
+  result = _bruteforce_sealed_key_bitflips(stream, driver, key0, key1, timeout);
+  if (result == 1) {
+    return;
+  }
+  // default unseal keys in reversed order
+  result = _bruteforce_sealed_key_bitflips(stream, driver, key1, key0, timeout);
+  if (result == 1) {
+    return;
+  }
+  // byte reversed keys
+  result = _bruteforce_sealed_key_bitflips(stream, driver, key0_reversed, key1_reversed, timeout);
+  if (result == 1) {
+    return;
+  }
+  // byte reversed keys in reversed order
+  result = _bruteforce_sealed_key_bitflips(stream, driver, key1_reversed, key0_reversed, timeout);
+  if (result == 1) {
+    return;
+  }
+  chprintf(stream, "\t\tfailed\n");
+
+
+  // bruteforcing one of the keys, assuming only one of them was changed
+  chprintf(stream, "\ttry bruteforcing a single key...\n");
+  // default unseal key0
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, key0, i, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", key0, i);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 1/8\n");
+  // reversed unseal key0
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, key0_reversed, i, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", key0_reversed, i);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 2/8\n");
+  // default unseal key0 in reversed order
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, i, key0, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", i, key0);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 3/8\n");
+  // reversed unseal key0 in reversed order
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, i, key0_reversed, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", i, key0_reversed);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 4/8\n");
+  // default unseal key1
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, i, key1, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", i, key1);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 5/8\n");
+  // reversed unseal key1
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, i, key1_reversed, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", i, key1_reversed);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 6/8\n");
+  // default unseal key1 in reversed order
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, key1, i, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", key1, i);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 7/8\n");
+  // reversed unseal key1 in reversed order
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    ctrl = _try_unseal(driver, key1_reversed, i, timeout);
+    if (ctrl.content.ss == 0x0) {
+      chprintf(stream, "\t\tSUCCESS!\n");
+      chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", key1_reversed, i);
+      return;
+    }
+  }
+  chprintf(stream, "\t\tkey failed. 8/8\n");
+  chprintf(stream, "\t\tfailed\n");
+
+
+  // full bruteforce
+  chprintf(stream, "\tbruteforcing both keys...\t");
+  for (uint32_t i = 0; i <= 0xFFFF; i++) {
+    chprintf(stream, "\t\ti: %u\n", i);
+    for (uint32_t j = 0; j <= 0xFFFF; j++) {
+      ctrl = _try_unseal(driver, i, j, timeout);
+      if (ctrl.content.ss == 0x0) {
+        chprintf(stream, "\t\tSUCCESS!\n");
+        chprintf(stream, "\t\tkey0: 0x%X, key1: 0x%X\n", i, j);
+        return;
+      }
+    }
+  }
+
+  chprintf(stream, "\t\tfailed, no keys could be found");
+}
+
 aos_utresult_t utAlldBq27500Func(BaseSequentialStream* stream, aos_unittest_t* ut)
 {
   aosDbgCheck(ut->data != NULL && ((ut_bq27500data_t*)(ut->data))->driver != NULL);
@@ -87,11 +315,11 @@ aos_utresult_t utAlldBq27500Func(BaseSequentialStream* stream, aos_unittest_t* u
   }
 
   chprintf(stream, "sub command: CTRL Status...\n");
-  aosThdMSleep(5);
+  aosThdUSleep(1);
   status = bq27500_lld_sub_command_call(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_SUB_CMD_CONTROL_STATUS, ((ut_bq27500data_t*)ut->data)->timeout);
-  aosThdMSleep(5);
+  aosThdUSleep(1);
   status |= bq27500_lld_std_command(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_STD_CMD_Control, &dst, ((ut_bq27500data_t*)ut->data)->timeout);
-  aosThdMSleep(5);
+  aosThdUSleep(1);
   bq27500_lld_control_status_t ctrl;
   status |= bq27500_lld_sub_command_read(((ut_bq27500data_t*)ut->data)->driver, &ctrl.value, ((ut_bq27500data_t*)ut->data)->timeout);
   chprintf(stream, "\t\tdst: 0x%X\n", ctrl.value);
@@ -194,17 +422,18 @@ aos_utresult_t utAlldBq27500Func(BaseSequentialStream* stream, aos_unittest_t* u
 
   chprintf(stream, "unseale...\n");
   status = bq27500_lld_send_ctnl_data(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_DEFAULT_UNSEAL_KEY1, ((ut_bq27500data_t*)ut->data)->timeout);
-  aosThdMSleep(50);
+  aosThdMSleep(1);
   status |= bq27500_lld_send_ctnl_data(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_DEFAULT_UNSEAL_KEY0, ((ut_bq27500data_t*)ut->data)->timeout);
-  aosThdMSleep(50);
+  aosThdMSleep(1);
   status |= bq27500_lld_sub_command_call(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_SUB_CMD_CONTROL_STATUS, ((ut_bq27500data_t*)ut->data)->timeout);
-  aosThdMSleep(50);
+  aosThdMSleep(1);
   status |= bq27500_lld_std_command(((ut_bq27500data_t*)ut->data)->driver, BQ27500_LLD_STD_CMD_Control, &dst, ((ut_bq27500data_t*)ut->data)->timeout);
   status |= bq27500_lld_sub_command_read(((ut_bq27500data_t*)ut->data)->driver, &ctrl.value, ((ut_bq27500data_t*)ut->data)->timeout);
   if (status == APAL_STATUS_SUCCESS && ctrl.content.ss == 0x0) {
     aosUtPassed(stream, &result);
   } else {
     aosUtFailedMsg(stream, &result, "0x%08X\n", status);
+    _bruteforce_sealed_key(stream, ((ut_bq27500data_t*)ut->data)->driver, ((ut_bq27500data_t*)ut->data)->timeout);
   }
 
   chprintf(stream, "read device name from data flash...\n");
