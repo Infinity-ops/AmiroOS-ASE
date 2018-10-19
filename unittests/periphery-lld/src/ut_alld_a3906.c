@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @brief   Interval to poll QEI in certain tests.
  */
-#define QEI_POLL_INTERVAL_MS          100
+#define QEI_POLL_INTERVAL_MS          10
 
 /**
  * @brief   Threshold for QEI differences.
@@ -116,6 +116,60 @@ void _wheelDirectionTest(BaseSequentialStream* stream, ut_a3906data_t* data, whe
   return;
 }
 
+void _wheelSpeedTest(BaseSequentialStream* stream, ut_a3906data_t* data, wheel_t wheel, direction_t direction, aos_utresult_t* result)
+{
+  // local variables
+  uint32_t status;
+  apalQEICount_t qei_range;
+  apalQEICount_t qei_count[2] = {0};
+  apalQEICount_t qei_increments[2] = {0};
+  apalQEICount_t qei_increments_diff = 0;
+  uint32_t timeout_counter = 0;
+  uint32_t stable_counter = 0;
+
+  chprintf(stream, "%s wheel full speed %s...\n", (wheel == WHEEL_LEFT) ? "left" : "right", (direction == DIRECTION_FORWARD) ? "forward" : "backward");
+  // spin up the wheel with full speed
+  status = apalQEIGetRange((wheel == WHEEL_LEFT) ? data->qei.left : data->qei.right, &qei_range);
+  status |= a3906_lld_set_pwm(data->pwm.driver, (wheel == WHEEL_LEFT) ?
+                               ((direction == DIRECTION_FORWARD) ? data->pwm.channel.left_forward : data->pwm.channel.left_backward) :
+                               ((direction == DIRECTION_FORWARD) ? data->pwm.channel.right_forward : data->pwm.channel.right_backward),
+                             APAL_PWM_WIDTH_MAX);
+  aosThdMSleep(100);
+  do {
+    // read QEI data to determine speed
+    status |= apalQEIGetPosition((wheel == WHEEL_LEFT) ? data->qei.left : data->qei.right, &qei_count[0]);
+    aosThdMSleep(QEI_POLL_INTERVAL_MS);
+    status |= apalQEIGetPosition((wheel == WHEEL_LEFT) ? data->qei.left : data->qei.right, &qei_count[1]);
+    timeout_counter += QEI_POLL_INTERVAL_MS;
+    qei_increments[0] = qei_increments[1];
+    qei_increments[1] = (direction == DIRECTION_FORWARD) ?
+                          ((qei_count[1] > qei_count[0]) ? (qei_count[1] - qei_count[0]) : (qei_count[1] + (qei_range - qei_count[0]))) :
+                          ((qei_count[0] > qei_count[1]) ? (qei_count[0] - qei_count[1]) : (qei_count[0] + (qei_range - qei_count[1])));
+    qei_increments_diff = abs((int32_t)qei_increments[0] - (int32_t)qei_increments[1]);
+    stable_counter = (qei_increments[1] != 0 && qei_increments_diff <= QEI_DIFF_THRESHOLD) ? stable_counter+1 : 0;
+  } while ((stable_counter* QEI_POLL_INTERVAL_MS < MILLISECONDS_PER_SECOND) && (timeout_counter * MICROSECONDS_PER_MILLISECOND <= data->timeout));
+  status |= a3906_lld_set_pwm(data->pwm.driver, (wheel == WHEEL_LEFT) ?
+                               ((direction == DIRECTION_FORWARD) ? data->pwm.channel.left_forward : data->pwm.channel.left_backward) :
+                               ((direction == DIRECTION_FORWARD) ? data->pwm.channel.right_forward : data->pwm.channel.right_backward),
+                             APAL_PWM_WIDTH_OFF);
+  status |= (timeout_counter * MICROSECONDS_PER_MILLISECOND > data->timeout) ? APAL_STATUS_TIMEOUT : 0x00;
+
+  // report results
+  if (status == APAL_STATUS_SUCCESS) {
+    aosUtPassed(stream, result);
+    const float tps = qei_increments[1] * ((float)MILLISECONDS_PER_SECOND / (float)QEI_POLL_INTERVAL_MS);
+    const float rpm = tps * SECONDS_PER_MINUTE / (float)data->qei.increments_per_revolution;
+    const float velocity = tps / (float)data->qei.increments_per_revolution * ((wheel == WHEEL_LEFT) ? data->wheel_diameter.left : data->wheel_diameter.right) * acos(-1);
+    chprintf(stream, "\t%f tps\n", tps);
+    chprintf(stream, "\t%f RPM\n", rpm);
+    chprintf(stream, "\t%f m/s\n", velocity);
+    chprintf(stream, "\n");
+  }
+  else {
+    aosUtFailedMsg(stream, result, "0x%08X\n", status);
+  }
+}
+
 /**
  * @brief   A3905 unit test function.
  *
@@ -139,11 +193,8 @@ aos_utresult_t utAlldA3906Func(BaseSequentialStream* stream, aos_unittest_t* ut)
   uint32_t status = 0;
   a3906_lld_power_t power_state;
   apalQEICount_t qei_count[2][2];
-  apalQEICount_t qei_range[2];
   uint32_t timeout_counter;
-  apalQEICount_t qei_increments[2][2];
   uint32_t stable_counter;
-  apalQEICount_t qei_increments_diff[2];
 
   chprintf(stream, "enable power...\n");
   power_state = A3906_LLD_POWER_ON;
@@ -158,65 +209,19 @@ aos_utresult_t utAlldA3906Func(BaseSequentialStream* stream, aos_unittest_t* ut)
 
   _wheelDirectionTest(stream, (ut_a3906data_t*)ut->data, WHEEL_LEFT, DIRECTION_FORWARD, &result);
 
-  _wheelDirectionTest(stream, (ut_a3906data_t*)ut->data, WHEEL_LEFT, DIRECTION_BACKWARD, &result);
-
   _wheelDirectionTest(stream, (ut_a3906data_t*)ut->data, WHEEL_RIGHT, DIRECTION_FORWARD, &result);
+
+  _wheelDirectionTest(stream, (ut_a3906data_t*)ut->data, WHEEL_LEFT, DIRECTION_BACKWARD, &result);
 
   _wheelDirectionTest(stream, (ut_a3906data_t*)ut->data, WHEEL_RIGHT, DIRECTION_BACKWARD, &result);
 
-  chprintf(stream, "both wheels full speed forward...\n");
-  status = APAL_STATUS_SUCCESS;
-  status |= a3906_lld_set_pwm(((ut_a3906data_t*)ut->data)->pwm.driver, ((ut_a3906data_t*)ut->data)->pwm.channel.left_forward, APAL_PWM_WIDTH_MAX);
-  status |= a3906_lld_set_pwm(((ut_a3906data_t*)ut->data)->pwm.driver, ((ut_a3906data_t*)ut->data)->pwm.channel.right_forward, APAL_PWM_WIDTH_MAX);
-  aosThdMSleep(100);
-  qei_count[WHEEL_LEFT][0] = 0;
-  qei_count[WHEEL_LEFT][1] = 0;
-  qei_count[WHEEL_RIGHT][0] = 0;
-  qei_count[WHEEL_RIGHT][1] = 0;
-  status |= apalQEIGetRange(((ut_a3906data_t*)ut->data)->qei.left, &qei_range[WHEEL_LEFT]);
-  status |= apalQEIGetRange(((ut_a3906data_t*)ut->data)->qei.right, &qei_range[WHEEL_RIGHT]);
-  timeout_counter = 0;
-  qei_increments[WHEEL_LEFT][0] = 0;
-  qei_increments[WHEEL_LEFT][1] = 0;
-  qei_increments[WHEEL_RIGHT][0] = 0;
-  qei_increments[WHEEL_RIGHT][1] = 0;
-  stable_counter = 0;
-  do {
-    status |= apalQEIGetPosition(((ut_a3906data_t*)ut->data)->qei.left, &qei_count[WHEEL_LEFT][0]);
-    status |= apalQEIGetPosition(((ut_a3906data_t*)ut->data)->qei.right, &qei_count[WHEEL_RIGHT][0]);
-    aosThdMSleep(QEI_POLL_INTERVAL_MS);
-    status |= apalQEIGetPosition(((ut_a3906data_t*)ut->data)->qei.left, &qei_count[WHEEL_LEFT][1]);
-    status |= apalQEIGetPosition(((ut_a3906data_t*)ut->data)->qei.right, &qei_count[WHEEL_RIGHT][1]);
-    timeout_counter += QEI_POLL_INTERVAL_MS;
-    qei_increments[WHEEL_LEFT][0] = qei_increments[WHEEL_LEFT][1];
-    qei_increments[WHEEL_LEFT][1] = (qei_count[WHEEL_LEFT][1] > qei_count[WHEEL_LEFT][0]) ? (qei_count[WHEEL_LEFT][1] - qei_count[WHEEL_LEFT][0]) : (qei_count[WHEEL_LEFT][1] + (qei_range[WHEEL_LEFT] - qei_count[WHEEL_LEFT][0]));
-    qei_increments[WHEEL_RIGHT][0] = qei_increments[WHEEL_RIGHT][1];
-    qei_increments[WHEEL_RIGHT][1] = (qei_count[WHEEL_RIGHT][1] > qei_count[WHEEL_RIGHT][0]) ? (qei_count[WHEEL_RIGHT][1] - qei_count[WHEEL_RIGHT][0]) : (qei_count[WHEEL_RIGHT][1] + (qei_range[WHEEL_RIGHT] - qei_count[WHEEL_RIGHT][0]));
-    qei_increments_diff[WHEEL_LEFT] = abs((int32_t)(qei_increments[WHEEL_LEFT][0]) - (int32_t)qei_increments[WHEEL_LEFT][1]);
-    qei_increments_diff[WHEEL_RIGHT] = abs((int32_t)(qei_increments[WHEEL_RIGHT][0]) - (int32_t)qei_increments[WHEEL_RIGHT][1]);
-    stable_counter = (qei_increments_diff[WHEEL_LEFT] <= QEI_DIFF_THRESHOLD && qei_increments_diff[WHEEL_RIGHT] < QEI_DIFF_THRESHOLD) ? stable_counter+1 : 0;
-  } while((stable_counter * QEI_POLL_INTERVAL_MS < MILLISECONDS_PER_SECOND) && (timeout_counter * MICROSECONDS_PER_MILLISECOND <= ((ut_a3906data_t*)ut->data)->timeout));
-  status |= (timeout_counter * MICROSECONDS_PER_MILLISECOND > ((ut_a3906data_t*)ut->data)->timeout) ? APAL_STATUS_TIMEOUT : 0x00;
-  if (status == APAL_STATUS_SUCCESS) {
-    aosUtPassed(stream, &result);
-    const float tps[2] = {qei_increments[WHEEL_LEFT][1] * ((float)MILLISECONDS_PER_SECOND / (float)QEI_POLL_INTERVAL_MS),
-                          qei_increments[WHEEL_RIGHT][1] * ((float)MILLISECONDS_PER_SECOND / (float)QEI_POLL_INTERVAL_MS)};
-    const float rpm[2] = {tps[WHEEL_LEFT] * SECONDS_PER_MINUTE / (float)(((ut_a3906data_t*)ut->data)->qei.increments_per_revolution),
-                          tps[WHEEL_RIGHT] * SECONDS_PER_MINUTE / (float)(((ut_a3906data_t*)ut->data)->qei.increments_per_revolution)};
-    const float velocity[2] = {tps[WHEEL_LEFT] / (float)(((ut_a3906data_t*)ut->data)->qei.increments_per_revolution) * ((ut_a3906data_t*)ut->data)->wheel_diameter * acos(-1),
-                               tps[WHEEL_RIGHT] / (float)(((ut_a3906data_t*)ut->data)->qei.increments_per_revolution) * ((ut_a3906data_t*)ut->data)->wheel_diameter * acos(-1)};
-    chprintf(stream, "left wheel:\n");
-    chprintf(stream, "\t%f tps\n", tps[WHEEL_LEFT]);
-    chprintf(stream, "\t%f RPM\n", rpm[WHEEL_LEFT]);
-    chprintf(stream, "\t%f m/s\n", velocity[WHEEL_LEFT]);
-    chprintf(stream, "right wheel:\n");
-    chprintf(stream, "\t%f tps\n", tps[WHEEL_RIGHT]);
-    chprintf(stream, "\t%f RPM\n", rpm[WHEEL_RIGHT]);
-    chprintf(stream, "\t%f m/s\n", velocity[WHEEL_RIGHT]);
-    chprintf(stream, "\n");
-  } else {
-    aosUtFailedMsg(stream, &result, "0x%08X\n", status);
-  }
+  _wheelSpeedTest(stream, (ut_a3906data_t*)ut->data, WHEEL_LEFT, DIRECTION_FORWARD, &result);
+
+  _wheelSpeedTest(stream, (ut_a3906data_t*)ut->data, WHEEL_RIGHT, DIRECTION_FORWARD, &result);
+
+  _wheelSpeedTest(stream, (ut_a3906data_t*)ut->data, WHEEL_LEFT, DIRECTION_BACKWARD, &result);
+
+  _wheelSpeedTest(stream, (ut_a3906data_t*)ut->data, WHEEL_RIGHT, DIRECTION_BACKWARD, &result);
 
   chprintf(stream, "disable power... \n");
   power_state = A3906_LLD_POWER_OFF;

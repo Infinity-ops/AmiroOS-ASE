@@ -91,9 +91,19 @@ typedef struct {
   } qei;
 
   /**
-   * @brief   Wheel diameter in m.
+   * @brief   Wheel diameter information.
    */
-  float wheel_diameter;
+  struct {
+    /**
+     * @brief   Left wheel diameter in m.
+     */
+    float left;
+
+    /**
+     * @brief   Right wheel diameter in m.
+     */
+    float right;
+  } wheel_diameter;
 
   /**
    * @brief   Timeout value (in us).
