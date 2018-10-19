@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   Structures and constant for the PowerManagement module.
  *
  * @addtogroup powermanagement_module
@@ -154,122 +154,122 @@ extern SerialConfig moduleHalProgIfConfig;
 /**
  * @brief   SYS_REG_EN output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysRegEn;
+extern ROMCONST apalControlGpio_t moduleGpioSysRegEn;
 
 /**
  * @brief   IR_INT1 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioIrInt1;
+extern ROMCONST apalControlGpio_t moduleGpioIrInt1;
 
 /**
  * @brief   POWER_EN output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioPowerEn;
+extern ROMCONST apalControlGpio_t moduleGpioPowerEn;
 
 /**
  * @brief   SYS_UART_DN bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysUartDn;
+extern ROMCONST apalControlGpio_t moduleGpioSysUartDn;
 
 /**
  * @brief   CHARGE_STAT2A input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioChargeStat2A;
+extern ROMCONST apalControlGpio_t moduleGpioChargeStat2A;
 
 /**
  * @brief   GAUGE_BATLOW2 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioGaugeBatLow2;
+extern ROMCONST apalControlGpio_t moduleGpioGaugeBatLow2;
 
 /**
  * @brief   GAUGE_BATGD2 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioGaugeBatGd2;
+extern ROMCONST apalControlGpio_t moduleGpioGaugeBatGd2;
 
 /**
  * @brief   LED output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLed;
+extern ROMCONST apalControlGpio_t moduleGpioLed;
 
 /**
  * @brief   SYS_UART_UP bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysUartUp;
+extern ROMCONST apalControlGpio_t moduleGpioSysUartUp;
 
 /**
  * @brief   CHARGE_STAT1A input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioChargeStat1A;
+extern ROMCONST apalControlGpio_t moduleGpioChargeStat1A;
 
 /**
  * @brief   GAUGE_BATLOW1 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioGaugeBatLow1;
+extern ROMCONST apalControlGpio_t moduleGpioGaugeBatLow1;
 
 /**
  * @brief   GAUGE_BATGD1 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioGaugeBatGd1;
+extern ROMCONST apalControlGpio_t moduleGpioGaugeBatGd1;
 
 /**
  * @brief   CHARG_EN1 output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioChargeEn1;
+extern ROMCONST apalControlGpio_t moduleGpioChargeEn1;
 
 /**
  * @brief   IR_INT2 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioIrInt2;
+extern ROMCONST apalControlGpio_t moduleGpioIrInt2;
 
 /**
  * @brief   TOUCH_INT input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioTouchInt;
+extern ROMCONST apalControlGpio_t moduleGpioTouchInt;
 
 /**
  * @brief   SYS_DONE input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysDone;
+extern ROMCONST apalControlGpio_t moduleGpioSysDone;
 
 /**
  * @brief   SYS_PROG output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysProg;
+extern ROMCONST apalControlGpio_t moduleGpioSysProg;
 
 /**
  * @brief   PATH_DC input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioPathDc;
+extern ROMCONST apalControlGpio_t moduleGpioPathDc;
 
 /**
  * @brief   SYS_SPI_DIR bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysSpiDir;
+extern ROMCONST apalControlGpio_t moduleGpioSysSpiDir;
 
 /**
  * @brief   SYS_SYNC bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysSync;
+extern ROMCONST apalControlGpio_t moduleGpioSysSync;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysPd;
+extern ROMCONST apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_WARMRST bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysWarmrst;
+extern ROMCONST apalControlGpio_t moduleGpioSysWarmrst;
 
 /**
  * @brief   BT_RST output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioBtRst;
+extern ROMCONST apalControlGpio_t moduleGpioBtRst;
 
 /**
  * @brief   CHARGE_EN2 output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioChargeEn2;
+extern ROMCONST apalControlGpio_t moduleGpioChargeEn2;
 
 /** @} */
 
@@ -354,7 +354,7 @@ extern apalControlGpio_t moduleGpioChargeEn2;
 /**
  * @brief   Shell prompt text.
  */
-extern const char* moduleShellPrompt;
+extern ROMCONST char* moduleShellPrompt;
 #endif
 
 /**

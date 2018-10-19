@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   Structures and constant for the DiWheelDrive module.
  *
  * @addtogroup diwheeldrive_module
@@ -144,7 +144,7 @@ static apalGpio_t _gpioLed = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_LED,
 };
-apalControlGpio_t moduleGpioLed = {
+ROMCONST apalControlGpio_t moduleGpioLed = {
   /* GPIO */ &_gpioLed,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -160,7 +160,7 @@ static apalGpio_t _gpioPowerEn = {
   /* port */ GPIOB,
   /* pad  */  GPIOB_POWER_EN,
 };
-apalControlGpio_t moduleGpioPowerEn = {
+ROMCONST apalControlGpio_t moduleGpioPowerEn = {
   /* GPIO */ &_gpioPowerEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -176,7 +176,7 @@ static apalGpio_t _gpioCompassDrdy = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_COMPASS_DRDY,
 };
-apalControlGpio_t moduleGpioCompassDrdy = {
+ROMCONST apalControlGpio_t moduleGpioCompassDrdy = {
   /* GPIO */ &_gpioCompassDrdy,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -192,7 +192,7 @@ static apalGpio_t _gpioIrInt = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_IR_INT,
 };
-apalControlGpio_t moduleGpioIrInt = {
+ROMCONST apalControlGpio_t moduleGpioIrInt = {
   /* GPIO */ &_gpioIrInt,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -208,7 +208,7 @@ static apalGpio_t _gpioGyroDrdy = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GYRO_DRDY,
 };
-apalControlGpio_t moduleGpioGyroDrdy = {
+ROMCONST apalControlGpio_t moduleGpioGyroDrdy = {
   /* GPIO */ &_gpioGyroDrdy,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -224,7 +224,7 @@ static apalGpio_t _gpioSysUartUp = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_UP,
 };
-apalControlGpio_t moduleGpioSysUartUp = {
+ROMCONST apalControlGpio_t moduleGpioSysUartUp = {
   /* GPIO */ &_gpioSysUartUp,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -240,7 +240,7 @@ static apalGpio_t _gpioAccelInt = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_ACCEL_INT_N,
 };
-apalControlGpio_t moduleGpioAccelInt = {
+ROMCONST apalControlGpio_t moduleGpioAccelInt = {
   /* GPIO */ &_gpioAccelInt,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -256,7 +256,7 @@ static apalGpio_t _gpioSysSync = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_INT_N,
 };
-apalControlGpio_t moduleGpioSysSync = {
+ROMCONST apalControlGpio_t  moduleGpioSysSync = {
   /* GPIO */ &_gpioSysSync,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -272,7 +272,7 @@ static apalGpio_t _gpioPathDcStat = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DCSTAT,
 };
-apalControlGpio_t moduleGpioPathDcStat = {
+ROMCONST apalControlGpio_t moduleGpioPathDcStat = {
   /* GPIO */ &_gpioPathDcStat,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -288,7 +288,7 @@ static apalGpio_t _gpioPathDcEn = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DCEN,
 };
-apalControlGpio_t moduleGpioPathDcEn = {
+ROMCONST apalControlGpio_t moduleGpioPathDcEn = {
   /* GPIO */ &_gpioPathDcEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -304,7 +304,7 @@ static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
-apalControlGpio_t moduleGpioSysPd = {
+ROMCONST apalControlGpio_t moduleGpioSysPd = {
   /* GPIO */ &_gpioSysPd,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -320,7 +320,7 @@ static apalGpio_t _gpioSysRegEn = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_REG_EN,
 };
-apalControlGpio_t moduleGpioSysRegEn = {
+ROMCONST apalControlGpio_t moduleGpioSysRegEn = {
   /* GPIO */ &_gpioSysRegEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -336,7 +336,7 @@ static apalGpio_t _gpioSysWarmrst = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_SYS_WARMRST_N,
 };
-apalControlGpio_t moduleGpioSysWarmrst = {
+ROMCONST apalControlGpio_t moduleGpioSysWarmrst = {
   /* GPIO */ &_gpioSysWarmrst,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -355,7 +355,7 @@ apalControlGpio_t moduleGpioSysWarmrst = {
 /*===========================================================================*/
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
-const char* moduleShellPrompt = "DiWheelDrive";
+ROMCONST char* moduleShellPrompt = "DiWheelDrive";
 #endif
 
 /** @} */
@@ -462,8 +462,11 @@ static ut_a3906data_t _utA3906Data = {
     /* right wheel              */ &MODULE_HAL_QEI_RIGHT_WHEEL,
     /* increment per revolution */ MODULE_HAL_QEI_INCREMENTS_PER_REVOLUTION,
   },
-  /* Wheel diameter   */ 0.05571f,
-  /* timeout          */ 10 * MICROSECONDS_PER_SECOND,
+  /* Wheel diameter   */ {
+    /* left wheel   */ 0.05571f,
+    /* right wheel  */ 0.05571f,
+  },
+  /* timeout          */ 5 * MICROSECONDS_PER_SECOND,
 };
 aos_unittest_t moduleUtAlldA3906  = {
   /* name           */ "A3906",

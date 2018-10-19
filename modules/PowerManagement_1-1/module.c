@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 /**
- * @file    
+ * @file
  * @brief   Structures and constant for the PowerManagement module.
  *
  * @addtogroup powermanagement_module
@@ -129,7 +129,7 @@ static apalGpio_t _gpioSysRegEn = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_SYS_REG_EN,
 };
-apalControlGpio_t moduleSysRegEn = {
+ROMCONST apalControlGpio_t moduleSysRegEn = {
   /* GPIO */ &_gpioSysRegEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -145,7 +145,7 @@ static apalGpio_t _gpioIrInt1 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_IR_INT1_N,
 };
-apalControlGpio_t moduleGpioIrInt1 = {
+ROMCONST apalControlGpio_t moduleGpioIrInt1 = {
   /* GPIO */ &_gpioIrInt1,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -161,7 +161,7 @@ static apalGpio_t _gpioPowerEn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_POWER_EN,
 };
-apalControlGpio_t moduleGpioPowerEn = {
+ROMCONST apalControlGpio_t moduleGpioPowerEn = {
   /* GPIO */ &_gpioPowerEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -177,7 +177,7 @@ static apalGpio_t _gpioSysUartDn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_DN,
 };
-apalControlGpio_t moduleGpioSysUartDn = {
+ROMCONST apalControlGpio_t moduleGpioSysUartDn = {
   /* GPIO */ &_gpioSysUartDn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -193,7 +193,7 @@ static apalGpio_t _gpioChargeStat2A = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_CHARGE_STAT2A,
 };
-apalControlGpio_t moduleGpioChargeStat2A = {
+ROMCONST apalControlGpio_t moduleGpioChargeStat2A = {
   /* GPIO */ &_gpioChargeStat2A,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -209,7 +209,7 @@ static apalGpio_t _gpioGaugeBatLow2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GAUGE_BATLOW2,
 };
-apalControlGpio_t moduleGpioGaugeBatLow2 = {
+ROMCONST apalControlGpio_t moduleGpioGaugeBatLow2 = {
   /* GPIO */ &_gpioGaugeBatLow2,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -225,7 +225,7 @@ static apalGpio_t _gpioGaugeBatGd2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_GAUGE_BATGD2_N,
 };
-apalControlGpio_t moduleGpioGaugeBatGd2 = {
+ROMCONST apalControlGpio_t moduleGpioGaugeBatGd2 = {
   /* GPIO */ &_gpioGaugeBatGd2,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -241,7 +241,7 @@ static apalGpio_t _gpioLed = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LED,
 };
-apalControlGpio_t moduleGpioLed = {
+ROMCONST apalControlGpio_t moduleGpioLed = {
   /* GPIO */ &_gpioLed,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -257,7 +257,7 @@ static apalGpio_t _gpioSysUartUp = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_UP,
 };
-apalControlGpio_t moduleGpioSysUartUp = {
+ROMCONST apalControlGpio_t moduleGpioSysUartUp = {
   /* GPIO */ &_gpioSysUartUp,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -273,7 +273,7 @@ static apalGpio_t _gpioChargeStat1A = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_CHARGE_STAT1A,
 };
-apalControlGpio_t moduleGpioChargeStat1A = {
+ROMCONST apalControlGpio_t moduleGpioChargeStat1A = {
   /* GPIO */ &_gpioChargeStat1A,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -289,7 +289,7 @@ static apalGpio_t _gpioGaugeBatLow1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_GAUGE_BATLOW1,
 };
-apalControlGpio_t moduleGpioGaugeBatLow1 = {
+ROMCONST apalControlGpio_t moduleGpioGaugeBatLow1 = {
   /* GPIO */ &_gpioGaugeBatLow1,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -305,7 +305,7 @@ static apalGpio_t _gpioGaugeBatGd1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_GAUGE_BATGD1_N,
 };
-apalControlGpio_t moduleGpioGaugeBatGd1 = {
+ROMCONST apalControlGpio_t moduleGpioGaugeBatGd1 = {
   /* GPIO */ &_gpioGaugeBatGd1,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -321,7 +321,7 @@ static apalGpio_t _gpioChargeEn1 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_CHARGE_EN1_N,
 };
-apalControlGpio_t moduleGpioChargeEn1 = {
+ROMCONST apalControlGpio_t moduleGpioChargeEn1 = {
   /* GPIO */ &_gpioChargeEn1,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -337,7 +337,7 @@ static apalGpio_t _gpioIrInt2 = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_IR_INT2_N,
 };
-apalControlGpio_t moduleGpioIrInt2 = {
+ROMCONST apalControlGpio_t moduleGpioIrInt2 = {
   /* GPIO */ &_gpioIrInt2,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -353,7 +353,7 @@ static apalGpio_t _gpioTouchInt = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_TOUCH_INT_N,
 };
-apalControlGpio_t moduleGpioTouchInt = {
+ROMCONST apalControlGpio_t moduleGpioTouchInt = {
   /* GPIO */ &_gpioTouchInt,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -369,7 +369,7 @@ static apalGpio_t _gpioSysDone = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_DONE,
 };
-apalControlGpio_t moduleGpioSysDone = {
+ROMCONST apalControlGpio_t moduleGpioSysDone = {
   /* GPIO */ &_gpioSysDone,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -385,7 +385,7 @@ static apalGpio_t _gpioSysProg = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PROG_N,
 };
-apalControlGpio_t moduleGpioSysProg = {
+ROMCONST apalControlGpio_t moduleGpioSysProg = {
   /* GPIO */ &_gpioSysProg,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -401,7 +401,7 @@ static apalGpio_t _gpioPathDc = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_PATH_DC,
 };
-apalControlGpio_t moduleGpioPathDc = {
+ROMCONST apalControlGpio_t moduleGpioPathDc = {
   /* GPIO */ &_gpioPathDc,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -417,7 +417,7 @@ static apalGpio_t _gpioSysSpiDir = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_SPI_DIR,
 };
-apalControlGpio_t moduleGpioSysSpiDir = {
+ROMCONST apalControlGpio_t moduleGpioSysSpiDir = {
   /* GPIO */ &_gpioSysSpiDir,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -433,7 +433,7 @@ static apalGpio_t _gpioSysSync = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_INT_N,
 };
-apalControlGpio_t moduleGpioSysSync = {
+ROMCONST apalControlGpio_t moduleGpioSysSync = {
   /* GPIO */ &_gpioSysSync,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -449,7 +449,7 @@ static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
-apalControlGpio_t moduleGpioSysPd = {
+ROMCONST apalControlGpio_t moduleGpioSysPd = {
   /* GPIO */ &_gpioSysPd,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -465,7 +465,7 @@ static apalGpio_t _gpioSysWarmrst = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_WARMRST_N,
 };
-apalControlGpio_t moduleGpioSysWarmrst = {
+ROMCONST apalControlGpio_t moduleGpioSysWarmrst = {
   /* GPIO */ &_gpioSysWarmrst,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -481,7 +481,7 @@ static apalGpio_t _gpioBtRst = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_BT_RST,
 };
-apalControlGpio_t moduleGpioBtRst = {
+ROMCONST apalControlGpio_t moduleGpioBtRst = {
   /* GPIO */ &_gpioBtRst,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -497,7 +497,7 @@ static apalGpio_t _gpioChargeEn2 = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_CHARGE_EN2_N,
 };
-apalControlGpio_t moduleGpioChargeEn2 = {
+ROMCONST apalControlGpio_t moduleGpioChargeEn2 = {
   /* GPIO */ &_gpioChargeEn2,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -516,7 +516,7 @@ apalControlGpio_t moduleGpioChargeEn2 = {
 /*===========================================================================*/
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
-const char* moduleShellPrompt = "PowerManagement";
+ROMCONST char* moduleShellPrompt = "PowerManagement";
 #endif
 
 /** @} */
@@ -1051,7 +1051,7 @@ static int _utShellCmdCb_AlldTps62113Ina219(BaseSequentialStream* stream, int ar
   aosUtRun(stream, &moduleUtAlldTps62113Ina219, "VSYS (4.2V)");
   return AOS_OK;
 }
-ut_tps62113ina219data_t _utAlldTps62113Ina219Data = {
+static ut_tps62113ina219data_t _utAlldTps62113Ina219Data = {
   /* TPS62113 */ &moduleLldStepDownConverter,
   /* INA219   */ &moduleLldPowerMonitorVsys42,
   /* timeout  */ MICROSECONDS_PER_SECOND,

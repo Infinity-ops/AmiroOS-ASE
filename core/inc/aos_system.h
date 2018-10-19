@@ -206,17 +206,12 @@ extern "C" {
 /**
  * @brief   Retrieves the system uptime.
  *
- * @param[out] ut   The system uptime.
+ * @param[out] ut   Pointer to the system uptime.
  */
-static inline void aosSysGetUptime(aos_timestamp_t* ut)
-{
-  aosDbgCheck(ut != NULL);
-
-  chSysLock();
-  aosSysGetUptimeX(ut);
-  chSysUnlock();
-
-  return;
+#define aosSysGetUptime(ut) {         \
+  chSysLock();                        \
+  aosSysGetUptimeX(ut);               \
+  chSysUnlock();                      \
 }
 
 #endif /* _AMIROOS_SYSTEM_H_ */

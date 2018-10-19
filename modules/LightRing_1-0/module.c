@@ -86,7 +86,7 @@ static apalGpio_t _gpioLightBlank = {
   /* port */ GPIOA,
   /* pad  */ GPIOA_LIGHT_BLANK,
 };
-apalControlGpio_t moduleGpioLightBlank = {
+ROMCONST apalControlGpio_t moduleGpioLightBlank = {
   /* GPIO */ &_gpioLightBlank,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -102,7 +102,7 @@ static apalGpio_t _gpioLaserEn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LASER_EN,
 };
-apalControlGpio_t moduleGpioLaserEn = {
+ROMCONST apalControlGpio_t moduleGpioLaserEn = {
   /* GPIO */ &_gpioLaserEn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -118,7 +118,7 @@ static apalGpio_t _gpioLaserOc = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_LASER_OC_N,
 };
-apalControlGpio_t moduleGpioLaserOc = {
+ROMCONST apalControlGpio_t moduleGpioLaserOc = {
   /* GPIO */ &_gpioLaserOc,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -134,7 +134,7 @@ static apalGpio_t _gpioSysUartDn = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_SYS_UART_DN,
 };
-apalControlGpio_t moduleGpioSysUartDn = {
+ROMCONST apalControlGpio_t moduleGpioSysUartDn = {
   /* GPIO */ &_gpioSysUartDn,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -150,7 +150,7 @@ static apalGpio_t _gpioWlGdo2 = {
   /* port */ GPIOB,
   /* pad  */ GPIOB_WL_GDO2,
 };
-apalControlGpio_t moduleGpioWlGdo2 = {
+ROMCONST apalControlGpio_t moduleGpioWlGdo2 = {
   /* GPIO */ &_gpioWlGdo2,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -166,7 +166,7 @@ static apalGpio_t _gpioWlGdo0= {
   /* port */ GPIOB,
   /* pad  */ GPIOB_WL_GDO0,
 };
-apalControlGpio_t moduleGpioWlGdo0 = {
+ROMCONST apalControlGpio_t moduleGpioWlGdo0 = {
   /* GPIO */ &_gpioWlGdo0,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_INPUT,
@@ -182,7 +182,7 @@ static apalGpio_t _gpioLightXlat = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_LIGHT_XLAT,
 };
-apalControlGpio_t moduleGpioLightXlat = {
+ROMCONST apalControlGpio_t moduleGpioLightXlat = {
   /* GPIO */ &_gpioLightXlat,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_OUTPUT,
@@ -198,7 +198,7 @@ static apalGpio_t _gpioSysPd = {
   /* port */ GPIOC,
   /* pad  */ GPIOC_SYS_PD_N,
 };
-apalControlGpio_t moduleGpioSysPd = {
+ROMCONST apalControlGpio_t moduleGpioSysPd = {
   /* GPIO */ &_gpioSysPd,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -214,7 +214,7 @@ static apalGpio_t _gpioSysSync = {
   /* port */ GPIOD,
   /* pad  */ GPIOD_SYS_INT_N,
 };
-apalControlGpio_t moduleGpioSysSync = {
+ROMCONST apalControlGpio_t moduleGpioSysSync = {
   /* GPIO */ &_gpioSysSync,
   /* meta */ {
     /* direction      */ APAL_GPIO_DIRECTION_BIDIRECTIONAL,
@@ -233,7 +233,7 @@ apalControlGpio_t moduleGpioSysSync = {
 /*===========================================================================*/
 
 #if (AMIROOS_CFG_SHELL_ENABLE == true) || defined(__DOXYGEN__)
-const char* moduleShellPrompt = "LightRing";
+ROMCONST char* moduleShellPrompt = "LightRing";
 #endif
 
 /** @} */

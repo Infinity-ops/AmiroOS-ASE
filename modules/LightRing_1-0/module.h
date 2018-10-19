@@ -104,47 +104,47 @@ extern SPIConfig moduleHalSpiWlConfig;
 /**
  * @brief   LIGHT_BANK output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLightBlank;
+extern ROMCONST apalControlGpio_t moduleGpioLightBlank;
 
 /**
  * @brief   LASER_EN output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLaserEn;
+extern ROMCONST apalControlGpio_t moduleGpioLaserEn;
 
 /**
  * @brief   LASER_OC input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLaserOc;
+extern ROMCONST apalControlGpio_t moduleGpioLaserOc;
 
 /**
  * @brief   SYS_UART_DN bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysUartDn;
+extern ROMCONST apalControlGpio_t moduleGpioSysUartDn;
 
 /**
  * @brief   WL_GDO2 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioWlGdo2;
+extern ROMCONST apalControlGpio_t moduleGpioWlGdo2;
 
 /**
  * @brief   WL_GDO0 input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioWlGdo0;
+extern ROMCONST apalControlGpio_t moduleGpioWlGdo0;
 
 /**
  * @brief   LIGHT_XLAT output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLightXlat;
+extern ROMCONST apalControlGpio_t moduleGpioLightXlat;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysPd;
+extern ROMCONST apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_SYNC bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysSync;
+extern ROMCONST apalControlGpio_t moduleGpioSysSync;
 
 /** @} */
 
@@ -189,7 +189,7 @@ extern apalControlGpio_t moduleGpioSysSync;
 /**
  * @brief   Shell prompt text.
  */
-extern const char* moduleShellPrompt;
+extern ROMCONST char* moduleShellPrompt;
 #endif
 
 /**

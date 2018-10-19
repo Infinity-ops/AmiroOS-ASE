@@ -169,67 +169,67 @@ extern SPIConfig moduleHalSpiGyroscopeConfig;
 /**
  * @brief   LED output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioLed;
+extern ROMCONST apalControlGpio_t moduleGpioLed;
 
 /**
  * @brief   POWER_EN output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioPowerEn;
+extern ROMCONST apalControlGpio_t moduleGpioPowerEn;
 
 /**
  * @brief   COMPASS_DRDY input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioCompassDrdy;
+extern ROMCONST apalControlGpio_t moduleGpioCompassDrdy;
 
 /**
  * @brief   IR_INT input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioIrInt;
+extern ROMCONST apalControlGpio_t moduleGpioIrInt;
 
 /**
  * @brief   GYRO_DRDY input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioGyroDrdy;
+extern ROMCONST apalControlGpio_t moduleGpioGyroDrdy;
 
 /**
  * @brief   SYS_UART_UP bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysUartUp;
+extern ROMCONST apalControlGpio_t moduleGpioSysUartUp;
 
 /**
  * @brief   ACCEL_INT input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioAccelInt;
+extern ROMCONST apalControlGpio_t moduleGpioAccelInt;
 
 /**
  * @brief   SYS_SNYC bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysSync;
+extern ROMCONST apalControlGpio_t moduleGpioSysSync;
 
 /**
  * @brief   PATH_DCSTAT input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioPathDcStat;
+extern ROMCONST apalControlGpio_t moduleGpioPathDcStat;
 
 /**
  * @brief   PATH_DCEN output signal GPIO.
  */
-extern apalControlGpio_t moduleGpioPathDcEn;
+extern ROMCONST apalControlGpio_t moduleGpioPathDcEn;
 
 /**
  * @brief   SYS_PD bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysPd;
+extern ROMCONST apalControlGpio_t moduleGpioSysPd;
 
 /**
  * @brief   SYS_REG_EN input signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysRegEn;
+extern ROMCONST apalControlGpio_t moduleGpioSysRegEn;
 
 /**
  * @brief   SYS_WARMRST bidirectional signal GPIO.
  */
-extern apalControlGpio_t moduleGpioSysWarmrst;
+extern ROMCONST apalControlGpio_t moduleGpioSysWarmrst;
 
 /** @} */
 
@@ -294,7 +294,7 @@ extern apalControlGpio_t moduleGpioSysWarmrst;
 /**
  * @brief   Shell prompt text.
  */
-extern const char* moduleShellPrompt;
+extern ROMCONST char* moduleShellPrompt;
 #endif
 
 /**
