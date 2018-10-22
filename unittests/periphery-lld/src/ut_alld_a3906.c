@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /**
  * @brief   Interval to poll QEI in certain tests.
  */
-#define QEI_POLL_INTERVAL_MS          10
+#define QEI_POLL_INTERVAL_MS          100
 
 /**
  * @brief   Threshold for QEI differences.

@@ -466,7 +466,7 @@ static ut_a3906data_t _utA3906Data = {
     /* left wheel   */ 0.05571f,
     /* right wheel  */ 0.05571f,
   },
-  /* timeout          */ 5 * MICROSECONDS_PER_SECOND,
+  /* timeout          */ 10 * MICROSECONDS_PER_SECOND,
 };
 aos_unittest_t moduleUtAlldA3906  = {
   /* name           */ "A3906",
