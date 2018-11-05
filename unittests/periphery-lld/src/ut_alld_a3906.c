@@ -34,9 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @brief   Threshold for QEI differences.
- * @details Differences smaller tahn or equal to this value are neglected (interpreted as zero).
+ * @details Differences smaller than or equal to this value are neglected (interpreted as zero).
+ *          The value can be interpreted as encoder ticks per second (tps).
+ * @note    The expected value is about 7000 tps and a jitter of up to ±2% is ok.
  */
-#define QEI_DIFF_THRESHOLD            4
+#define QEI_DIFF_THRESHOLD            (apalQEICount_t)(7000 * 0.02f)
 
 /**
  * @brief   Enumerator to distinguish between left and right wheel.
@@ -145,8 +147,11 @@ void _wheelSpeedTest(BaseSequentialStream* stream, ut_a3906data_t* data, wheel_t
     qei_increments[1] = (direction == DIRECTION_FORWARD) ?
                           ((qei_count[1] > qei_count[0]) ? (qei_count[1] - qei_count[0]) : (qei_count[1] + (qei_range - qei_count[0]))) :
                           ((qei_count[0] > qei_count[1]) ? (qei_count[0] - qei_count[1]) : (qei_count[0] + (qei_range - qei_count[1])));
-    qei_increments_diff = abs((int32_t)qei_increments[0] - (int32_t)qei_increments[1]);
-    stable_counter = (qei_increments[1] != 0 && qei_increments_diff <= QEI_DIFF_THRESHOLD) ? stable_counter+1 : 0;
+    qei_increments_diff = abs((int32_t)qei_increments[0] - (int32_t)qei_increments[1]) * ((float)MILLISECONDS_PER_SECOND / (float)QEI_POLL_INTERVAL_MS);
+    stable_counter = ((qei_increments[0] != 0 || qei_increments[1] != 0) && qei_increments_diff <= QEI_DIFF_THRESHOLD) ? stable_counter+1 : 0;
+    if (qei_increments[0] != 0 && stable_counter == 0) {
+      chprintf(stream, "\tunstable speed? jitter of %u tps is above threshold (%u tps).\n", qei_increments_diff, QEI_DIFF_THRESHOLD);
+    }
   } while ((stable_counter* QEI_POLL_INTERVAL_MS < MILLISECONDS_PER_SECOND) && (timeout_counter * MICROSECONDS_PER_MILLISECOND <= data->timeout));
   status |= a3906_lld_set_pwm(data->pwm.driver, (wheel == WHEEL_LEFT) ?
                                ((direction == DIRECTION_FORWARD) ? data->pwm.channel.left_forward : data->pwm.channel.left_backward) :
