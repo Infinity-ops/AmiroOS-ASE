@@ -291,10 +291,6 @@ ULIBS +=
 # End of user defines                                                          #
 ################################################################################
 
-# allow for custom build directory
-ifneq ($(BUILDDIR),)
-  BUILDDIR := $(BUILDDIR)/$(PROJECT)
-endif
 
 RULESPATH = $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC
 include $(RULESPATH)/rules.mk
