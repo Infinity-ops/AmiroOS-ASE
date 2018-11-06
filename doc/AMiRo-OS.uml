@@ -19,23 +19,76 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 @startuml
 skinparam componentStyle uml2
 
-interface hal.h #lightgrey
-interface ch.h #lightgrey
-component ChibiOS #lightgrey
-ChibiOS -up- hal.h
-ChibiOS -up- ch.h
+'-------------------------------------------------------------------------------
+' AMiRo-BLT
+'-------------------------------------------------------------------------------
 
 !include ../bootloader/AMiRo-BLT/Target/Doc/AMiRo-BLT.uml
+
+'-------------------------------------------------------------------------------
+' ChibiOS
+'-------------------------------------------------------------------------------
+
+node "AMiRo-OS" as AMiRoOS_node {
+	interface mcuconf.h
+	interface halconf.h
+	interface chconf.h
+}
+
+node "ChibiOS" as ChibiOS_node{
+	interface hal.h #lightgrey
+	interface osal.h #lightgrey
+	interface cmsis.h #lightgrey
+	interface ch.h #lightgrey
+	interface ch.hpp #lightgrey
+
+	component "ChibiOS/HAL" as ChibiOS_HAL #lightgrey
+	ChibiOS_HAL -up-( mcuconf.h
+	ChibiOS_HAL -up-( halconf.h
+	ChibiOS_HAL -up- hal.h
+	ChibiOS_HAL -up-( osal.h
+
+	component "ChibiOS/RT" as ChibiOS_RT #lightgrey
+	ChibiOS_RT -up-( chconf.h
+	ChibiOS_RT -up-( hal.h
+	ChibiOS_RT -up- osal.h
+	ChibiOS_RT -up- cmsis.h
+	ChibiOS_RT -up- ch.h
+	ChibiOS_RT -up- ch.hpp
+}
+
+'-------------------------------------------------------------------------------
+' AMiRo-LLD
+'-------------------------------------------------------------------------------
+
+node "AMiRo-OS" as AMiRoOS_node {
+	interface alldconf.h
+}
+
 !include ../periphery-lld/AMiRo-LLD/docs/AMiRo-LLD.uml
 
-interface amiroos.h
 
-component "AMiRo-OS" as AMiRoOS
-AMiRoOS -down-( hal.h
-AMiRoOS -down-( ch.h
-AMiRoOS -down-( amiroblt.h
-AMiRoOS -down-( periphAL.h
-AMiRoOS -up- amiroos.h
+'-------------------------------------------------------------------------------
+' AMiRo-OS
+'-------------------------------------------------------------------------------
+
+interface osconf.h
+
+node "AMiRo-OS" as AMiRoOS_node {
+	interface amiroos.h
+
+	component "AMiRo-OS" as AMiRoOS
+	AMiRoOS -- mcuconf.h
+	AMiRoOS -- halconf.h
+	AMiRoOS -- chconf.h
+	AMiRoOS --( hal.h
+	AMiRoOS --( ch.h
+	AMiRoOS --( amiroblt.h
+	AMiRoOS -- alldconf.h
+	AMiRoOS --( periphAL.h
+	AMiRoOS -up-( osconf.h
+	AMiRoOS -up- amiroos.h
+}
 
 @enduml
 
