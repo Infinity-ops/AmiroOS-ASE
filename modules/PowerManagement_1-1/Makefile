@@ -208,7 +208,6 @@ INCDIR = $(CHIBIOS)/os/license \
          $(TESTINC) \
          $(BOOTLOADERINC) \
          $(CHIBIOS)/os/hal/lib/streams \
-         $(CHIBIOS)/os/various \
          $(PERIPHERYLLDINC) \
          $(AMIROOS) \
          $(AMIROOSCOREINC) \

@@ -551,7 +551,6 @@ function createLightRingProject {
   find $chibiosrootdir -type d | grep -E "/os/hal/ports/(common/ARMCMx|STM32/(LLD/(CANv1|DACv1|DMAv1|EXTIv1|GPIOv1|I2Cv1|RTCv1|SDIOv1|SPIv1|TIMv1|USARTv1|USBv1|xWDGv1)|STM32F1xx))$" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/os/license$" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/os/rt/(include|src)$" >> ${projectdir}/LightRing.includes
-  find $chibiosrootdir -type d | grep -E "/os/various/(shell|cpp_wrappers)" >> ${projectdir}/LightRing.includes
   find $chibiosrootdir -type d | grep -E "/test/(lib|rt/source/test)$" >> ${projectdir}/LightRing.includes
   find $amirobltrootdir -type d | grep -E "/Target/Source/AMiRo$" >> ${projectdir}/LightRing.includes
   echo "$(realpath ${amirolldrootdir}/..)" >> ${projectdir}/LightRing.includes
@@ -685,7 +684,6 @@ function createPowerManagementProject {
   find $chibiosrootdir -type d | grep -E "/os/hal/ports/(common/ARMCMx|STM32/(LLD/(ADCv2|CANv1|DACv1|DMAv2|EXTIv1|GPIOv2|I2Cv1|MACv1|OTGv1|RTCv2|SDIOv1|SPIv1|TIMv1|USARTv1|USBv1|xWDGv1)|STM32F4xx))$" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/os/license$" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/os/rt/(include|src)$" >> ${projectdir}/PowerManagement.includes
-  find $chibiosrootdir -type d | grep -E "/os/various/(shell|cpp_wrappers)" >> ${projectdir}/PowerManagement.includes
   find $chibiosrootdir -type d | grep -E "/test/(lib|rt/source/test)$" >> ${projectdir}/PowerManagement.includes
   find $amirobltrootdir -type d | grep -E "/Target/Source/AMiRo$" >> ${projectdir}/PowerManagement.includes
   echo "$(realpath ${amirolldrootdir}/..)" >> ${projectdir}/PowerManagement.includes
@@ -818,7 +816,6 @@ function createDiWheelDriveProject {
   find $chibiosrootdir -type d | grep -E "/os/hal/ports/(common/ARMCMx|STM32/(LLD/(CANv1|DACv1|DMAv1|EXTIv1|GPIOv1|I2Cv1|RTCv1|SDIOv1|SPIv1|TIMv1|USARTv1|USBv1|xWDGv1)|STM32F1xx))$" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/os/license$" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/os/rt/(include|src)$" >> ${projectdir}/DiWheelDrive.includes
-  find $chibiosrootdir -type d | grep -E "/os/various/(shell|cpp_wrappers)" >> ${projectdir}/DiWheelDrive.includes
   find $chibiosrootdir -type d | grep -E "/test/(lib|rt/source/test)$" >> ${projectdir}/DiWheelDrive.includes
   find $amirobltrootdir -type d | grep -E "/Target/Source/AMiRo$" >> ${projectdir}/DiWheelDrive.includes
   echo "$(realpath ${amirolldrootdir}/..)" >> ${projectdir}/DiWheelDrive.includes
