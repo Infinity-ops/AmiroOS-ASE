@@ -57,9 +57,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /* subsystems headers */
 #include <aosconf.h>
 #include <hal.h>
-#if defined(HAL_USE_QEI) && (HAL_USE_QEI == TRUE)
-#include <hal_qei.h>
-#endif
 #include <ch.h>
 
 /* configuration check */

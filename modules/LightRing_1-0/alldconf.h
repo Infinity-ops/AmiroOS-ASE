@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * @file
- * @brief   AMiRo-LLD Configuration file for the LightRing v1.0 module.
+ * @brief   AMiRo-LLD configuration file for the LightRing v1.0 module.
  * @details Contains the application specific AMiRo-LLD settings.
  *
  * @addtogroup lightring_lld_config
@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * @brief   Width of the apalTime_t data type.
  *
  * @details Possible values are 8, 16, 32, and 64 bits.
- *          By definition time is represented ot a microsecond precision.
+ *          By definition time is represented at microsecond precision.
  */
 #define AMIROLLD_CFG_TIME_SIZE          32
 
