@@ -543,22 +543,22 @@ static int _shellcmd_shutdowncb(BaseSequentialStream* stream, int argc, char* ar
   else {
     if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--hibernate") == 0) {
       chEvtBroadcastFlags(&aos.events.os, AOS_SYSTEM_EVENTFLAGS_HIBERNATE);
-      chThdTerminate(currp);
+      chThdTerminate(chThdGetSelfX());
       return AOS_OK;
     }
     else if (strcmp(argv[1], "-d") == 0 || strcmp(argv[1], "--deepsleep") == 0) {
       chEvtBroadcastFlags(&aos.events.os, AOS_SYSTEM_EVENTFLAGS_DEEPSLEEP);
-      chThdTerminate(currp);
+      chThdTerminate(chThdGetSelfX());
       return AOS_OK;
     }
     else if (strcmp(argv[1], "-t") == 0 || strcmp(argv[1], "--transportation") == 0) {
       chEvtBroadcastFlags(&aos.events.os, AOS_SYSTEM_EVENTFLAGS_TRANSPORTATION);
-      chThdTerminate(currp);
+      chThdTerminate(chThdGetSelfX());
       return AOS_OK;
     }
     else if (strcmp(argv[1], "-r") == 0 || strcmp(argv[1], "--restart") == 0) {
       chEvtBroadcastFlags(&aos.events.os, AOS_SYSTEM_EVENTFLAGS_RESTART);
-      chThdTerminate(currp);
+      chThdTerminate(chThdGetSelfX());
       return AOS_OK;
     }
     else {
