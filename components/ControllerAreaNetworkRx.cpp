@@ -172,6 +172,7 @@ int16_t ControllerAreaNetworkRx::getGyroscopeValue(int axis)
 }
 
 
+
 uint16_t ControllerAreaNetworkRx::getProximityFloorValue(int index) {
   return this->proximityFloorValue[index];
 }

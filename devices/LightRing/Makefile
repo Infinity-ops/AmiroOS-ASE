@@ -76,6 +76,7 @@ include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F1xx/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
 include $(CHIBIOS)/os/various/cpp_wrappers/kernel.mk
+include $(AMIRO)/hal/hal.mk
 
 # Define linker script file here
 LDSCRIPT= $(BOARDLD)/STM32F103xE.ld
