@@ -62,9 +62,9 @@ public:
   // };
 
   //I2S driver global implementation
-  #define I2S_BUF_SIZE        256
-  uint16_t i2s_rx_buf[I2S_BUF_SIZE];
-  uint16_t i2s_tx_buf[I2S_BUF_SIZE];
+  #define I2S_BUF_SIZE        20
+//  uint32_t i2s_tx_buf[I2S_BUF_SIZE];
+  uint32_t i2s_rx_buf[I2S_BUF_SIZE]= { };
 
   //dummy function
   static void i2scallback(I2SDriver *i2sp, size_t offset, size_t n){
@@ -73,14 +73,18 @@ public:
     (void)n;
   }
 
-  I2SConfig i2scfg {
-    i2s_tx_buf,
+  I2SConfig i2scfg = {
+    NULL,
     i2s_rx_buf,
     I2S_BUF_SIZE,
     i2scallback,
-    SPI_I2SCFGR_CHLEN,
-    SPI_I2SPR_MCKOE
+    (/*PCMSYNC*/ 1 << 7) | (/*I2SSTD*/ 2 << 4) | (/*CKPOL*/ 0 << 3) | (/*DATLEN*/ 0 << 1) | (/*CHLEN*/ 0 << 0)
+    (17 << SPI_I2SPR_I2SDIV_POS) | SPI_I2SPR_ODD,
+
   };
+//  SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CHLEN ,
+  //SPI_I2SCFGR_CKPOL,
+  //SPI_I2SPR_ODD | SPI_I2SPR_I2SDIV
 
   /**
    * @brief I2C Bus 2
