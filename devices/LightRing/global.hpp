@@ -62,9 +62,9 @@ public:
   // };
 
   //I2S driver global implementation
-  #define I2S_BUF_SIZE        20
+  #define I2S_BUF_SIZE         8000
 //  uint32_t i2s_tx_buf[I2S_BUF_SIZE];
-  uint32_t i2s_rx_buf[I2S_BUF_SIZE]= { };
+  uint32_t i2s_rx_buf[I2S_BUF_SIZE];
 
   //dummy function
   static void i2scallback(I2SDriver *i2sp, size_t offset, size_t n){
@@ -78,11 +78,10 @@ public:
     i2s_rx_buf,
     I2S_BUF_SIZE,
     i2scallback,
-    (/*PCMSYNC*/ 1 << 7) | (/*I2SSTD*/ 2 << 4) | (/*CKPOL*/ 0 << 3) | (/*DATLEN*/ 0 << 1) | (/*CHLEN*/ 0 << 0)
-    (17 << SPI_I2SPR_I2SDIV_POS) | SPI_I2SPR_ODD,
-
+    SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CKPOL,
+    17 << 0 | SPI_I2SPR_I2SDIV
   };
-//  SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CHLEN ,
+ //SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CKPOL,
   //SPI_I2SCFGR_CKPOL,
   //SPI_I2SPR_ODD | SPI_I2SPR_I2SDIV
 

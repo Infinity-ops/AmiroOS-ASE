@@ -25,7 +25,9 @@ UserThread::main()
      i2sStart(&I2SD2, &global.i2scfg);
      chprintf((BaseSequentialStream*) &global.sercanmux1,"starts exchange \n");
      i2sStartExchange(&I2SD2);
-     this->sleep(MS2ST(1000));
+     this->sleep(MS2ST(10000));
+     i2sStopExchange(&I2SD2);
+     i2sStop(&I2SD2);
 
 
     while (!this->shouldTerminate())
@@ -37,35 +39,26 @@ UserThread::main()
      */
      
 
-    //chprintf((BaseSequentialStream*)&global.sercanmux1,"0x%04X \n", &global.i2scfg.i2s_rx_buf);
-      for(int i=0; i < 20; i++)
+
+      for(int i=0; i < 8000; i++)
       {
 
-	      chprintf((BaseSequentialStream*) &global.sercanmux1, "i2s_rx_buffer: \n");
-          chprintf((BaseSequentialStream*) &global.sercanmux1, "0x%08X\n",
-		            global.i2s_rx_buf[i]);
-	//      chprintf((BaseSequentialStream*) &global.sercanmux1, "i2s_tx_buffer: \n");
-	//      chprintf((BaseSequentialStream*) &global.sercanmux1, "0x%04X \n",
-	//                  global.i2s_tx_buf[i]);
-          chprintf((BaseSequentialStream*) &global.sercanmux1, "0x%08X \n",
-                        global.i2scfg.rx_buffer);
+          chprintf((BaseSequentialStream*) &global.sercanmux1, "%d, %d\n",
+                    i, global.i2s_rx_buf[i]);
+
       }
-      chprintf((BaseSequentialStream*) &global.sercanmux1, "0x%032X \n",
-                    global.i2scfg.rx_buffer);
-//      chprintf((BaseSequentialStream*) &global.sercanmux1, "i2s_tx_buffer: \n");
-//      chprintf((BaseSequentialStream*) &global.sercanmux1, "0x%04X \n",
-//                  global.i2s_tx_buf[3999]);
-      
+
+
 
 
     chprintf((BaseSequentialStream*) &global.sercanmux1,"stop exchange \n");
     chprintf((BaseSequentialStream*) &global.sercanmux1,"checking \n");
 
+   this->sleep(MS2ST(1000));
+
 
   }
-  i2sStopExchange(&I2SD2);
-  this->sleep(MS2ST(1000));
-  
+
   // SHUTDOWN CODE
 
   return RDY_OK;
