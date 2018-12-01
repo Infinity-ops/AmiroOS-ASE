@@ -62,7 +62,7 @@ public:
   // };
 
   //I2S driver global implementation
-  #define I2S_BUF_SIZE         8000
+  #define I2S_BUF_SIZE         8192
 //  uint32_t i2s_tx_buf[I2S_BUF_SIZE];
   uint32_t i2s_rx_buf[I2S_BUF_SIZE];
 
@@ -78,7 +78,7 @@ public:
     i2s_rx_buf,
     I2S_BUF_SIZE,
     i2scallback,
-    SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CKPOL,
+    SPI_I2SCFGR_DATLEN_1 | SPI_I2SCFGR_CKPOL,
     17 << 0 | SPI_I2SPR_I2SDIV
   };
  //SPI_I2SCFGR_DATLEN_0 | SPI_I2SCFGR_CKPOL,
